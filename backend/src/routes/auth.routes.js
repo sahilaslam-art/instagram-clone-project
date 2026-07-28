@@ -1,0 +1,16 @@
+import express from 'express';
+import * as authController from '../controllers/auth.controller.js';
+import { validate } from '../middlewares/validation.middleware.js';
+import { registerSchema, loginSchema, verifyOtpSchema } from '../validators/auth.validator.js';
+import { authenticate } from '../middlewares/auth.middleware.js';
+
+const router = express.Router();
+
+router.post('/register', validate(registerSchema), authController.register);
+router.post('/login', validate(loginSchema), authController.login);
+router.post('/verify-mobile', validate(verifyOtpSchema), authController.verifyMobile);
+router.post('/verify-email', validate(verifyOtpSchema), authController.verifyEmail);
+router.get('/refresh', authenticate, authController.refresh);
+router.post('/logout', authenticate, authController.logout);
+
+export default router;

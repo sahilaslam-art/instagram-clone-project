@@ -1,0 +1,6 @@
+{
+  "name": "InvestPro",
+  "description": "An investment platform with distinct roles for Customers, Owners, and Admins.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

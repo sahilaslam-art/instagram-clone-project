@@ -1,0 +1,46 @@
+import mongoose from 'mongoose';
+
+const kycVerificationSchema = new mongoose.Schema({
+    // User Information
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    userRole: { type: String, enum: ['Customer', 'Owner'], required: true },
+
+    // Personal Information (Matches DB Design)
+    fullName: { type: String, required: true },
+    dateOfBirth: { type: Date, required: true },
+    gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
+    address: { type: String, required: true },
+
+    // Bank Information
+    bankInfo: {
+        accountHolderName: { type: String, required: true },
+        bankName: { type: String, required: true },
+        accountNumber: { type: String, required: true },
+        ifscCode: { type: String, required: true }
+    },
+
+    // KYC Documents (URLs to uploaded files)
+    documents: {
+        identityProof: { type: String, required: true },
+        addressProof: { type: String, required: true },
+        bankProof: { type: String, required: true },
+        additionalDocuments: [{ type: String }]
+    },
+
+    // Verification Information
+    verificationStatus: { 
+        type: String, 
+        enum: ['Incomplete', 'Pending', 'Verified', 'Rejected'], 
+        default: 'Pending' 
+    },
+    submittedDate: { type: Date, default: Date.now },
+    reviewedDate: { type: Date, default: null },
+
+    // Review Information
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }, // Admin ID
+    rejectionReason: { type: String, default: null }
+}, {
+    timestamps: true
+});
+
+export const KYCVerification = mongoose.model('KYCVerification', kycVerificationSchema);

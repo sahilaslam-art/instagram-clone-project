@@ -1,0 +1,40 @@
+import { User } from '../models/user.model.js';
+
+export const findById = async (id) => {
+    return await User.findById(id);
+};
+
+export const findByEmailOrMobile = async (email, mobileNumber) => {
+    return await User.findOne({
+        $or: [{ email }, { mobileNumber }]
+    });
+};
+
+export const findByEmail = async (email) => {
+    return await User.findOne({ email });
+};
+
+export const findByMobile = async (mobileNumber) => {
+    return await User.findOne({ mobileNumber });
+};
+
+export const create = async (userData) => {
+    const user = new User(userData);
+    return await user.save();
+};
+
+export const updateById = async (id, updateData) => {
+    return await User.findByIdAndUpdate(id, updateData, { new: true });
+};
+
+export const findAllByRole = async (role) => {
+    return await User.find({ role }).select('-password');
+};
+
+export const countAll = async () => {
+    return await User.countDocuments();
+};
+
+export const countByRole = async (role) => {
+    return await User.countDocuments({ role });
+};

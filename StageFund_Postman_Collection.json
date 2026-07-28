@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "StageFund Complete API Collection",
+    "description": "Collection of all StageFund APIs for Postman import",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test User\",\n  \"mobileNumber\": \"9876543210\",\n  \"email\": \"test@stagefund.com\",\n  \"password\": \"password123\",\n  \"role\": \"Customer\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"test@stagefund.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Customer APIs",
+      "item": [
+        {
+          "name": "Customer Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/customer/dashboard", "host": ["{{baseUrl}}"], "path": ["customer", "dashboard"] }
+          }
+        },
+        {
+          "name": "Wallet: Add Funds",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50000\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/customer/wallet/add-funds", "host": ["{{baseUrl}}"], "path": ["customer", "wallet", "add-funds"] }
+          }
+        },
+        {
+          "name": "Projects: Browse Available",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/customer/projects", "host": ["{{baseUrl}}"], "path": ["customer", "projects"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Owner APIs",
+      "item": [
+        {
+          "name": "Owner Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/owner/dashboard", "host": ["{{baseUrl}}"], "path": ["owner", "dashboard"] }
+          }
+        },
+        {
+          "name": "Projects: Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectTitle\": \"My New Startup\",\n  \"projectCategory\": \"Tech\",\n  \"projectDescription\": \"An amazing tech app\",\n  \"projectLocation\": \"Mumbai\",\n  \"fundingTarget\": 100000,\n  \"minimumInvestmentAmount\": 5000,\n  \"expectedReturn\": 15,\n  \"riskLevel\": \"Medium\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/owner/projects", "host": ["{{baseUrl}}"], "path": ["owner", "projects"] }
+          }
+        },
+        {
+          "name": "Projects: Get My Projects",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/owner/projects", "host": ["{{baseUrl}}"], "path": ["owner", "projects"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Admin APIs",
+      "item": [
+        {
+          "name": "Admin Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/admin/dashboard", "host": ["{{baseUrl}}"], "path": ["admin", "dashboard"] }
+          }
+        },
+        {
+          "name": "Users: Get All Owners",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/admin/owners", "host": ["{{baseUrl}}"], "path": ["admin", "owners"] }
+          }
+        },
+        {
+          "name": "Projects: Review Pending Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Live\",\n  \"reviewNotes\": \"Looks good\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/admin/projects/:projectId/review", "host": ["{{baseUrl}}"], "path": ["admin", "projects", ":projectId", "review"] }
+          }
+        }
+      ]
+    }
+  ]
+}
