@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000/api/v1';
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'https://instagram-clone-project-backend.onrender.com/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
