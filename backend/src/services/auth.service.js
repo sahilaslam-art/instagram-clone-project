@@ -5,6 +5,11 @@ import jwt from 'jsonwebtoken';
 export const registerUser = async (userData) => {
     const { fullName, email, mobileNumber, password, role } = userData;
 
+    // Validate role
+    if (!['Customer', 'Owner', 'Feature_Admin'].includes(role)) {
+        throw new Error('Invalid Role Selected');
+    }
+
     // Check if email or mobile exists
     const existingUser = await userRepository.findByEmailOrMobile(email, mobileNumber);
 

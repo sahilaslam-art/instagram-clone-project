@@ -154,6 +154,7 @@ export default function RegisterPage() {
               >
                 <option value="Customer">Invest in Projects (Customer)</option>
                 <option value="Owner">Raise Funds (Project Owner)</option>
+                <option value="Feature_Admin">Join as Admin (Feature Admin)</option>
               </select>
             </div>
 

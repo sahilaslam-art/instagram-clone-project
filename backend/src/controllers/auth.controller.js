@@ -6,7 +6,7 @@ export const register = async (req, res, next) => {
         const user = await authService.registerUser(req.body);
         return sendResponse(res, 201, true, 'Account Created Successfully', user);
     } catch (error) {
-        if (error.message === 'Email Already Exists' || error.message === 'Mobile Number Already Exists') {
+        if (error.message === 'Email Already Exists' || error.message === 'Mobile Number Already Exists' || error.message === 'Invalid Role Selected') {
             return sendResponse(res, 400, false, error.message);
         }
         next(error);

@@ -6,7 +6,7 @@ export const registerSchema = z.object({
         mobileNumber: z.string({ required_error: "Mobile Number is required" }).regex(/^\d{10}$/, "Mobile Number must be 10 digits"),
         email: z.string({ required_error: "Email Address is required" }).email("Invalid email format"),
         password: z.string({ required_error: "Password is required" }).min(6, "Password must be at least 6 characters"),
-        role: z.enum(['Customer', 'Owner'], { required_error: "Role is required and must be either Customer or Owner" })
+        role: z.enum(['Customer', 'Owner', 'Feature_Admin'], { required_error: "Role is required and must be either Customer, Owner or Feature_Admin" })
     })
 });
 

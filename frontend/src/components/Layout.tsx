@@ -56,16 +56,46 @@ export default function Layout() {
     { to: '/owner/support', icon: HelpCircle, label: 'Support' },
   ];
 
-  const adminLinks = [
-    { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/admin/customers', icon: Users, label: 'Customer Verification' },
-    { to: '/admin/owners', icon: Users, label: 'Owner Verification' },
-    { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' },
-    { to: '/admin/validations', icon: CheckSquare, label: 'Project Validation' },
-    { to: '/admin/tracking', icon: List, label: 'Live Projects Tracking' },
-    { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' },
-    { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' },
-  ];
+  let adminLinks = [];
+  const uRole = currentUser.role.toUpperCase();
+
+  if (uRole === 'SUPER_ADMIN' || uRole === 'SUB_ADMIN') {
+    adminLinks = [
+      { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/admin/customers', icon: Users, label: 'Customer Verification' },
+      { to: '/admin/owners', icon: Users, label: 'Owner Verification' },
+      { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' },
+      { to: '/admin/validations', icon: CheckSquare, label: 'Project Validation' },
+      { to: '/admin/tracking', icon: List, label: 'Live Projects Tracking' },
+      { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' },
+      { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' },
+    ];
+    if (uRole === 'SUPER_ADMIN') {
+      // Add Sub-Admin management
+      adminLinks.splice(1, 0, { to: '/admin/sub-admins', icon: Users, label: 'Sub-Admins' });
+    }
+    // Add Feature Admin applications
+    adminLinks.splice(2, 0, { to: '/admin/feature-requests', icon: CheckSquare, label: 'Feature Admin Requests' });
+  } else if (uRole === 'FEATURE_ADMIN') {
+    adminLinks = [
+      { to: '/admin/feature-onboarding', icon: User, label: 'My Application' }
+    ];
+    if (currentUser.kycStatus === 'Verified') {
+      // Add specific links based on feature role
+      const fRole = currentUser.featureRole;
+      if (fRole === 'KYC Admin') {
+        adminLinks.push({ to: '/admin/customers', icon: Users, label: 'Customer Verification' });
+        adminLinks.push({ to: '/admin/owners', icon: Users, label: 'Owner Verification' });
+      } else if (fRole === 'Finance Admin') {
+        adminLinks.push({ to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' });
+      } else if (fRole === 'Support Admin') {
+        adminLinks.push({ to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' });
+      } else if (fRole === 'Project Admin') {
+        adminLinks.push({ to: '/admin/validations', icon: CheckSquare, label: 'Project Validation' });
+        adminLinks.push({ to: '/admin/tracking', icon: List, label: 'Live Projects Tracking' });
+      }
+    }
+  }
 
   const links = currentUser.role.toUpperCase() === 'CUSTOMER' ? customerLinks 
               : currentUser.role.toUpperCase() === 'OWNER' ? ownerLinks 
@@ -122,7 +152,7 @@ export default function Layout() {
         <header className="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
           <h2 className="text-lg font-medium text-gray-800">Welcome, {currentUser.fullName || 'User'}</h2>
           <div className="flex items-center gap-4">
-            {currentUser.role.toUpperCase() !== 'ADMIN' && (
+            {['CUSTOMER', 'OWNER'].includes(currentUser.role.toUpperCase()) && (
               <div className={`${themeBgText} px-4 py-2 rounded-full font-medium text-sm`}>
                 Balance: ${(currentUser.walletBalance || 0).toLocaleString()}
               </div>

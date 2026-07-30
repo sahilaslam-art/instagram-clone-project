@@ -55,6 +55,27 @@ export const getAllOwners = async (req, res, next) => {
     }
 };
 
+export const getAllSubAdmins = async (req, res, next) => {
+    try {
+        const subAdmins = await userService.getAllSubAdmins();
+        return sendResponse(res, 200, true, 'Sub-Admins Retrieved Successfully', subAdmins);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const promoteToSubAdmin = async (req, res, next) => {
+    try {
+        const result = await userService.promoteToSubAdmin(req.body.userId);
+        return sendResponse(res, 200, true, result.message);
+    } catch (error) {
+        if (error.message === 'User not found') {
+            return sendResponse(res, 404, false, error.message);
+        }
+        next(error);
+    }
+};
+
 export const getPendingProfileUpdates = async (req, res, next) => {
     try {
         const requests = await userService.getPendingProfileUpdates();

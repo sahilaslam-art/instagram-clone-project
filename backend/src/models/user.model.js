@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     // Account Information
     role: { 
         type: String, 
-        enum: ['Customer', 'Owner', 'Admin'], 
+        enum: ['Customer', 'Owner', 'Super_Admin', 'Sub_Admin', 'Feature_Admin'], 
         required: true 
     },
     accountStatus: { 
@@ -32,6 +32,13 @@ const userSchema = new mongoose.Schema({
     dateOfBirth: { type: Date, default: null },
     gender: { type: String, enum: ['Male', 'Female', 'Other', null], default: null },
     address: { type: String, default: null },
+
+    // Admin Specific Information
+    featureRole: { 
+        type: String, 
+        enum: ['KYC Admin', 'Finance Admin', 'Support Admin', 'Project Admin', null], 
+        default: null 
+    },
 
     // Bank Information
     bankInfo: {

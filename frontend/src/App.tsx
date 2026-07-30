@@ -34,6 +34,9 @@ import AdminValidations from './pages/admin/Validations';
 import AdminTracking from './pages/admin/Tracking';
 import AdminSupport from './pages/admin/Support';
 import AdminWithdrawals from './pages/admin/Withdrawals';
+import FeatureAdminOnboarding from './pages/admin/FeatureAdminOnboarding';
+import AdminSubAdmins from './pages/admin/SubAdmins';
+import AdminFeatureRequests from './pages/admin/FeatureRequests';
 
 export default function App() {
   return (
@@ -70,6 +73,9 @@ export default function App() {
               <Route path="tracking" element={<AdminTracking />} />
               <Route path="support" element={<AdminSupport />} />
               <Route path="withdrawals" element={<AdminWithdrawals />} />
+              <Route path="feature-onboarding" element={<FeatureAdminOnboarding />} />
+              <Route path="sub-admins" element={<AdminSubAdmins />} />
+              <Route path="feature-requests" element={<AdminFeatureRequests />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
