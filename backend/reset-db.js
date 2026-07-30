@@ -19,11 +19,31 @@ const resetDb = async () => {
             email: 'admin@stagefund.com',
             mobileNumber: '0000000000',
             password: hashedPassword,
-            role: 'Admin',
-            isActive: true
+            role: 'Super_Admin',
+            isActive: true,
+            isEmailVerified: true,
+            isMobileVerified: true
         });
 
         await adminUser.save();
+        console.log('✅ Admin user created successfully!');
+        console.log('Email: admin@stagefund.com');
+        console.log('Password: admin123');
+
+        const subAdminUser = new User({
+            fullName: 'Sub Admin',
+            email: 'subadmin@stagefund.com',
+            mobileNumber: '0000000001',
+            password: hashedPassword,
+            role: 'Sub_Admin',
+            isActive: true,
+            isEmailVerified: true,
+            isMobileVerified: true
+        });
+        await subAdminUser.save();
+        console.log('✅ Sub-Admin user created successfully!');
+        console.log('Email: subadmin@stagefund.com');
+        console.log('Password: admin123');
         console.log('✅ Admin user created successfully!');
         console.log('Email: admin@stagefund.com');
         console.log('Password: admin123');
