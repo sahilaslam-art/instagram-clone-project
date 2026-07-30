@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
 import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
 
 import authRoutes from './src/routes/auth.routes.js';
 import customerRoutes from './src/routes/customer.routes.js';
@@ -16,7 +15,25 @@ const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-app.use(mongoSanitize());
+
+// Custom NoSQL injection sanitizer (express-mongo-sanitize is incompatible with Express v5
+// because req.query is a read-only getter in Express v5)
+const sanitize = (obj) => {
+    if (obj && typeof obj === 'object') {
+        for (const key of Object.keys(obj)) {
+            if (key.startsWith('$') || key.includes('.')) {
+                delete obj[key];
+            } else {
+                sanitize(obj[key]);
+            }
+        }
+    }
+};
+app.use((req, res, next) => {
+    sanitize(req.body);
+    sanitize(req.params);
+    next();
+});
 
 // Request logging middleware
 app.use((req, res, next) => {
