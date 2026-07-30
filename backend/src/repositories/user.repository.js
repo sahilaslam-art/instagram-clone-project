@@ -27,6 +27,10 @@ export const updateById = async (id, updateData) => {
     return await User.findByIdAndUpdate(id, updateData, { new: true });
 };
 
+export const deleteById = async (id) => {
+    return await User.findByIdAndDelete(id);
+};
+
 export const findAllByRole = async (role) => {
     return await User.find({ role }).select('-password');
 };

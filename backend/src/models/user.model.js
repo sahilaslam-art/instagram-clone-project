@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     // Account Information
     role: { 
         type: String, 
-        enum: ['Customer', 'Owner', 'Super_Admin', 'Sub_Admin', 'Feature_Admin'], 
+        enum: ['Customer', 'Owner', 'Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'], 
         required: true 
     },
     accountStatus: { 
@@ -33,12 +33,8 @@ const userSchema = new mongoose.Schema({
     gender: { type: String, enum: ['Male', 'Female', 'Other', null], default: null },
     address: { type: String, default: null },
 
-    // Admin Specific Information
-    featureRole: { 
-        type: String, 
-        enum: ['KYC Admin', 'Finance Admin', 'Support Admin', 'Project Admin', null], 
-        default: null 
-    },
+    // Specific profile information (like domain, zone, region) will be stored in separate collections
+    // linked by userId.
 
     // Bank Information
     bankInfo: {

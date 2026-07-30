@@ -1,12 +1,16 @@
 import * as userRepository from '../repositories/user.repository.js';
+import { ZonalAdminProfile } from '../models/zonal-admin.model.js';
+import { AdminProfile } from '../models/admin.model.js';
+import { SubAdminProfile } from '../models/sub-admin.model.js';
+import { WorkerProfile } from '../models/worker.model.js';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 
 export const registerUser = async (userData) => {
-    const { fullName, email, mobileNumber, password, role } = userData;
+    const { fullName, email, mobileNumber, password, role, featureRole, domain, zone, region, category, speciality } = userData;
 
     // Validate role
-    if (!['Customer', 'Owner', 'Feature_Admin'].includes(role)) {
+    if (!['Customer', 'Owner', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'].includes(role)) {
         throw new Error('Invalid Role Selected');
     }
 
@@ -25,7 +29,7 @@ export const registerUser = async (userData) => {
     // Hash password
     const hashedPassword = await argon2.hash(password);
 
-    // Create user
+    // Create base user
     const newUser = await userRepository.create({
         fullName,
         email,
@@ -33,6 +37,23 @@ export const registerUser = async (userData) => {
         password: hashedPassword,
         role
     });
+
+    // Create Profile Document based on Role
+    try {
+        if (role === 'Zonal_Admin') {
+            await ZonalAdminProfile.create({ userId: newUser._id, domain, zone });
+        } else if (role === 'Admin') {
+            await AdminProfile.create({ userId: newUser._id, domain, zone, region });
+        } else if (role === 'Sub_Admin') {
+            await SubAdminProfile.create({ userId: newUser._id, featureRole, domain, zone, region, category });
+        } else if (role === 'Worker') {
+            await WorkerProfile.create({ userId: newUser._id, featureRole, domain, zone, region, category, speciality });
+        }
+    } catch (err) {
+        // If profile creation fails, we should ideally rollback user creation, but for now we throw error
+        await userRepository.deleteById(newUser._id); // Assuming this method exists or we can just let it fail
+        throw new Error('Failed to create role profile. Please check all required fields.');
+    }
 
     return {
         id: newUser._id,

@@ -13,7 +13,13 @@ export default function RegisterPage() {
     mobileNumber: '',
     email: '',
     password: '',
-    role: 'Customer' // default
+    role: 'Customer', // default
+    featureRole: '',
+    domain: '',
+    zone: '',
+    region: '',
+    category: '',
+    speciality: ''
   });
 
   const [otpData, setOtpData] = useState({
@@ -152,11 +158,88 @@ export default function RegisterPage() {
                 value={formData.role}
                 onChange={handleChange}
               >
-                <option value="Customer">Invest in Projects (Customer)</option>
-                <option value="Owner">Raise Funds (Project Owner)</option>
-                <option value="Feature_Admin">Join as Admin (Feature Admin)</option>
+                <option value="Customer">Customer (Invest in Projects)</option>
+                <option value="Owner">Owner (Raise Funds)</option>
+                <option value="Zonal_Admin">Zonal Admin</option>
+                <option value="Admin">Admin</option>
+                <option value="Sub_Admin">Sub Admin</option>
+                <option value="Worker">Worker</option>
               </select>
             </div>
+
+            {['Sub_Admin', 'Worker'].includes(formData.role) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Functional Role (Department)</label>
+                <select
+                  name="featureRole"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+                  value={formData.featureRole}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Department</option>
+                  <option value="Owner verification and profile update admin">Owner Verification & Profile</option>
+                  <option value="Customer verification and profile update admin">Customer Verification & Profile</option>
+                  <option value="Project verification and projects update admin">Project Verification & Updates</option>
+                  <option value="Support admin">Support</option>
+                  <option value="Owner / Customer withdrawal manage admin">Withdrawal Management</option>
+                </select>
+              </div>
+            )}
+
+            {['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'].includes(formData.role) && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Domain</label>
+                  <select name="domain" required className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white" value={formData.domain} onChange={handleChange}>
+                    <option value="">Select</option>
+                    {[...Array(9)].map((_, i) => <option key={i} value={`D${i+1}`}>D{i+1}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Zone</label>
+                  <select name="zone" required className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white" value={formData.zone} onChange={handleChange}>
+                    <option value="">Select</option>
+                    {[...Array(9)].map((_, i) => <option key={i} value={`Z${i+1}`}>Z{i+1}</option>)}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {['Admin', 'Sub_Admin', 'Worker'].includes(formData.role) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                <select name="region" required className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white" value={formData.region} onChange={handleChange}>
+                  <option value="">Select Region</option>
+                  {[...Array(20)].map((_, i) => <option key={i} value={`R${i+1}`}>R{i+1}</option>)}
+                </select>
+              </div>
+            )}
+
+            {['Sub_Admin', 'Worker'].includes(formData.role) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select name="category" required className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white" value={formData.category} onChange={handleChange}>
+                  <option value="">Select Category</option>
+                  {[...Array(10)].map((_, i) => <option key={i} value={`C${i+1}`}>C{i+1}</option>)}
+                </select>
+              </div>
+            )}
+
+            {formData.role === 'Worker' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Speciality</label>
+                <input
+                  type="text"
+                  name="speciality"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  value={formData.speciality}
+                  onChange={handleChange}
+                  placeholder="e.g. KYC Reviewer"
+                />
+              </div>
+            )}
 
             <button
               type="submit"

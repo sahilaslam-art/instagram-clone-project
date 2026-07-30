@@ -1,17 +1,22 @@
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
 
 import authRoutes from './src/routes/auth.routes.js';
 import customerRoutes from './src/routes/customer.routes.js';
 import ownerRoutes from './src/routes/owner.routes.js';
 import adminRoutes from './src/routes/admin.routes.js';
+import hierarchyRoutes from './src/routes/hierarchy.routes.js';
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 const app = express();
 
 app.use(cors());
+app.use(helmet());
 app.use(express.json());
+app.use(mongoSanitize());
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -24,6 +29,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/customer', customerRoutes);
 app.use('/api/v1/owner', ownerRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/hierarchy', hierarchyRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {
