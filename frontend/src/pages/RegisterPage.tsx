@@ -167,7 +167,7 @@ export default function RegisterPage() {
               </select>
             </div>
 
-            {['Sub_Admin', 'Worker'].includes(formData.role) && (
+            {['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'].includes(formData.role) && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Functional Role (Department)</label>
                 <select

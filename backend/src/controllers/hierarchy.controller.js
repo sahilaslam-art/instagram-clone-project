@@ -20,7 +20,8 @@ export const getPendingAdmins = async (req, res, next) => {
         const pending = await AdminProfile.find({ 
             isVerifiedByZonalAdmin: false,
             domain: currentAdmin.domain,
-            zone: currentAdmin.zone
+            zone: currentAdmin.zone,
+            featureRole: currentAdmin.featureRole
         }).populate('userId', 'fullName email mobileNumber accountStatus');
         
         return sendResponse(res, 200, true, 'Pending Admins fetched', pending);
@@ -36,7 +37,8 @@ export const getPendingSubAdmins = async (req, res, next) => {
             isVerifiedByAdmin: false,
             domain: currentAdmin.domain,
             zone: currentAdmin.zone,
-            region: currentAdmin.region
+            region: currentAdmin.region,
+            featureRole: currentAdmin.featureRole
         }).populate('userId', 'fullName email mobileNumber accountStatus');
         
         return sendResponse(res, 200, true, 'Pending Sub-Admins fetched', pending);

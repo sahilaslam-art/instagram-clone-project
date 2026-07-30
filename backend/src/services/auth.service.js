@@ -41,9 +41,9 @@ export const registerUser = async (userData) => {
     // Create Profile Document based on Role
     try {
         if (role === 'Zonal_Admin') {
-            await ZonalAdminProfile.create({ userId: newUser._id, domain, zone });
+            await ZonalAdminProfile.create({ userId: newUser._id, featureRole, domain, zone });
         } else if (role === 'Admin') {
-            await AdminProfile.create({ userId: newUser._id, domain, zone, region });
+            await AdminProfile.create({ userId: newUser._id, featureRole, domain, zone, region });
         } else if (role === 'Sub_Admin') {
             await SubAdminProfile.create({ userId: newUser._id, featureRole, domain, zone, region, category });
         } else if (role === 'Worker') {
