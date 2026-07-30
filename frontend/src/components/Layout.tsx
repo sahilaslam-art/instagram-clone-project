@@ -76,6 +76,11 @@ export default function Layout() {
     }
     // Add Feature Admin applications
     adminLinks.splice(2, 0, { to: '/admin/feature-requests', icon: CheckSquare, label: 'Feature Admin Requests' });
+  } else if (['ZONAL_ADMIN', 'ADMIN', 'WORKER'].includes(uRole)) {
+    // New hierarchy roles — show dashboard and pending approvals
+    adminLinks = [
+      { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    ];
   } else if (uRole === 'FEATURE_ADMIN') {
     adminLinks = [
       { to: '/admin/feature-onboarding', icon: User, label: 'My Application' }
