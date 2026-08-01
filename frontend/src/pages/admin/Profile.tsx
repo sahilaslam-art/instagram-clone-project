@@ -95,8 +95,9 @@ export default function AdminProfile() {
     }
   };
 
+  const isSuperAdmin = currentUser.role.toUpperCase() === 'SUPER_ADMIN';
   const isVerified = currentUser.kycStatus === 'Verified';
-  const showKycForm = currentUser.kycStatus === 'Incomplete' || currentUser.kycStatus === 'Not Submitted' || currentUser.kycStatus === 'Rejected' || !currentUser.kycStatus;
+  const showKycForm = !isSuperAdmin && (currentUser.kycStatus === 'Incomplete' || currentUser.kycStatus === 'Not Submitted' || currentUser.kycStatus === 'Rejected' || !currentUser.kycStatus);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
@@ -107,21 +108,33 @@ export default function AdminProfile() {
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-          <div className="flex items-center gap-3">
-            {isVerified ? (
-              <ShieldCheck className="w-8 h-8 text-blue-600" />
-            ) : (
-              <ShieldAlert className="w-8 h-8 text-amber-500" />
-            )}
-            <div>
-              <div className="font-semibold text-gray-900">Verification Status</div>
-              <div className={`text-sm font-medium ${
-                isVerified ? 'text-blue-600' : 'text-amber-500'
-              }`}>
-                {currentUser.kycStatus || 'Incomplete'}
+          {!isSuperAdmin ? (
+            <div className="flex items-center gap-3">
+              {isVerified ? (
+                <ShieldCheck className="w-8 h-8 text-blue-600" />
+              ) : (
+                <ShieldAlert className="w-8 h-8 text-amber-500" />
+              )}
+              <div>
+                <div className="font-semibold text-gray-900">Verification Status</div>
+                <div className={`text-sm font-medium ${
+                  isVerified ? 'text-blue-600' : 'text-amber-500'
+                }`}>
+                  {currentUser.kycStatus || 'Incomplete'}
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="w-8 h-8 text-blue-600" />
+              <div>
+                <div className="font-semibold text-gray-900">Platform Access</div>
+                <div className="text-sm font-medium text-blue-600">
+                  Super Administrator
+                </div>
+              </div>
+            </div>
+          )}
           {!isEditing && !showKycForm && (
             <button 
               onClick={() => setIsEditing(true)}
