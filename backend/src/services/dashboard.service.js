@@ -5,6 +5,7 @@ import * as walletRepository from '../repositories/wallet.repository.js';
 import * as notificationRepository from '../repositories/notification.repository.js';
 import * as kycRepository from '../repositories/kyc.repository.js';
 import * as supportRepository from '../repositories/support.repository.js';
+import * as profileUpdateRepository from '../repositories/profile-update-request.repository.js';
 
 export const getCustomerDashboard = async (userId) => {
     const user = await userRepository.findById(userId);
@@ -57,16 +58,22 @@ export const getAdminDashboard = async () => {
     const totalCustomers = await userRepository.countByRole('Customer');
     const totalOwners = await userRepository.countByRole('Owner');
     
-    const pendingKYC = (await kycRepository.findAllPending()).length;
-    const pendingProjects = (await projectRepository.findAllPending()).length;
-    const openTickets = (await supportRepository.findAll('Open')).length;
+    const staffVerification = await kycRepository.countPendingByRoles(['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker']);
+    const customerOwnerVerification = await kycRepository.countPendingByRoles(['Customer', 'Owner']);
+    const profileUpdates = await profileUpdateRepository.countPending();
+    const projectsVerification = await projectRepository.countPending();
+    const withdrawals = await walletRepository.countPendingWithdrawals();
+    const supportTickets = await supportRepository.countAll('Open');
 
     return {
         userStats: { totalUsers, totalCustomers, totalOwners },
         pendingApprovals: {
-            kyc: pendingKYC,
-            projects: pendingProjects
+            staff: staffVerification,
+            customersAndOwners: customerOwnerVerification,
+            profileUpdates,
+            projects: projectsVerification,
+            withdrawals
         },
-        openSupportTickets: openTickets
+        openSupportTickets: supportTickets
     };
 };

@@ -12,6 +12,11 @@ export const findAllPending = async () => {
     return await KYCVerification.find({ verificationStatus: 'Pending', userRole: { $in: ['Customer', 'Owner'] } }).populate('userId', 'fullName email role').sort('createdAt');
 };
 
+export const countPendingByRoles = async (roles) => {
+    return await KYCVerification.countDocuments({ verificationStatus: 'Pending', userRole: { $in: roles } });
+};
+
+
 export const create = async (kycData) => {
     const kyc = new KYCVerification(kycData);
     return await kyc.save();

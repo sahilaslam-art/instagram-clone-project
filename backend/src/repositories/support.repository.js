@@ -13,6 +13,12 @@ export const findAll = async (status) => {
     return await SupportTicket.find(query).populate('userId', 'fullName email role').sort('-createdAt');
 };
 
+export const countAll = async (status) => {
+    const query = status ? { ticketStatus: status } : {};
+    return await SupportTicket.countDocuments(query);
+};
+
+
 export const create = async (ticketData) => {
     const ticket = new SupportTicket(ticketData);
     return await ticket.save();

@@ -22,6 +22,11 @@ export const findAllPending = async () => {
     return await Project.find({ projectStatus: 'Submitted' }).populate('ownerId', 'fullName').sort('createdAt');
 };
 
+export const countPending = async () => {
+    return await Project.countDocuments({ projectStatus: 'Submitted' });
+};
+
+
 export const findActive = async () => {
     return await Project.find({ projectStatus: { $in: ['Stage', 'Live', 'Finished'] } }).populate('ownerId', 'fullName email').sort('-createdAt');
 };

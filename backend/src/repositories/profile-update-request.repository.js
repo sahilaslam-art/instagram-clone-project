@@ -9,6 +9,11 @@ export const findAllPending = async () => {
     return await ProfileUpdateRequest.find({ status: 'Pending' }).populate('ownerId', 'fullName email mobileNumber').sort('createdAt');
 };
 
+export const countPending = async () => {
+    return await ProfileUpdateRequest.countDocuments({ status: 'Pending' });
+};
+
+
 export const findById = async (id) => {
     return await ProfileUpdateRequest.findById(id).populate('ownerId');
 };

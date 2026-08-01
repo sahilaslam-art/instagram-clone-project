@@ -31,6 +31,14 @@ export const findPendingWithdrawals = async () => {
     .sort('createdAt');
 };
 
+export const countPendingWithdrawals = async () => {
+    return await WalletTransaction.countDocuments({ 
+        transactionType: { $in: ['Customer Withdrawal', 'Owner Withdrawal'] }, 
+        transactionStatus: 'Pending' 
+    });
+};
+
+
 export const findTransactionById = async (id) => {
     return await WalletTransaction.findById(id).populate('walletId');
 };

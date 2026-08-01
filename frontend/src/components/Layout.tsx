@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -11,12 +11,28 @@ import {
 export default function Layout() {
   const { currentUser, logout, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState<any>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isLoading && !currentUser) {
       navigate('/');
     }
   }, [currentUser, isLoading, navigate]);
+
+  useEffect(() => {
+    if (currentUser && ['SUPER_ADMIN', 'ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(currentUser.role.toUpperCase())) {
+      fetchDashboardStats();
+    }
+  }, [currentUser]);
+
+  const fetchDashboardStats = async () => {
+    try {
+      const res = await api.get('/admin/dashboard');
+      setStats(res.data.data);
+    } catch (err) {
+      console.error('Failed to load dashboard stats for badges', err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -40,6 +56,24 @@ export default function Layout() {
     navigate('/');
   };
 
+  const getBadgeValue = (badgeKey?: string) => {
+    if (!stats || !badgeKey) return 0;
+    if (badgeKey === 'support') return stats.openSupportTickets;
+    return stats.pendingApprovals?.[badgeKey] || 0;
+  };
+
+  const renderBadge = (badgeKey?: string) => {
+    const val = getBadgeValue(badgeKey);
+    if (val > 0) {
+      return (
+        <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+          {val}
+        </span>
+      );
+    }
+    return null;
+  };
+
   const customerLinks = [
     { to: '/customer/projects', icon: Briefcase, label: 'Browse Projects' },
     { to: '/customer/cart', icon: ShoppingCart, label: 'My Cart' },
@@ -56,7 +90,7 @@ export default function Layout() {
     { to: '/owner/support', icon: HelpCircle, label: 'Support' },
   ];
 
-  let adminLinks = [];
+  let adminLinks: any[] = [];
   const uRole = currentUser.role.toUpperCase();
 
   if (uRole === 'SUPER_ADMIN') {
@@ -66,38 +100,35 @@ export default function Layout() {
       { to: '/admin/staff/admin', icon: Users, label: 'Admins' },
       { to: '/admin/staff/sub_admin', icon: Users, label: 'Sub-Admins' },
       { to: '/admin/staff/worker', icon: Users, label: 'Workers' },
-      { to: '/admin/staff-verification', icon: CheckSquare, label: 'Staff Verification' },
-      { to: '/admin/customers', icon: Users, label: 'Customer Verification' },
+      { to: '/admin/staff-verification', icon: CheckSquare, label: 'Staff Verification', badgeKey: 'staff' },
+      { to: '/admin/customers', icon: Users, label: 'Customer Verification', badgeKey: 'customersAndOwners' },
       { to: '/admin/owners', icon: Users, label: 'Owner Verification' },
-      { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' },
-      { to: '/admin/validations', icon: CheckSquare, label: 'Project Validation' },
+      { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates', badgeKey: 'profileUpdates' },
+      { to: '/admin/validations', icon: CheckSquare, label: 'Project Validation', badgeKey: 'projects' },
       { to: '/admin/tracking', icon: List, label: 'Live Projects Tracking' },
-      { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' },
-      { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' },
+      { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals', badgeKey: 'withdrawals' },
+      { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets', badgeKey: 'support' },
     ];
   } else if (['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(uRole)) {
     if (currentUser.kycStatus === 'Verified') {
       adminLinks.push({ to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' });
       
       if (['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN'].includes(uRole)) {
-        adminLinks.push({ to: '/admin/staff-verification', icon: Users, label: 'Staff Verification' });
+        adminLinks.push({ to: '/admin/staff-verification', icon: Users, label: 'Staff Verification', badgeKey: 'staff' });
       }
       
-      // Add all operational links for verified admins in the hierarchy
       adminLinks.push(
-        { to: '/admin/customers', icon: Users, label: 'Customer Verification' },
+        { to: '/admin/customers', icon: Users, label: 'Customer Verification', badgeKey: 'customersAndOwners' },
         { to: '/admin/owners', icon: Users, label: 'Owner Verification' },
-        { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' },
-        { to: '/admin/validations', icon: CheckSquare, label: 'Project Validation' },
+        { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates', badgeKey: 'profileUpdates' },
+        { to: '/admin/validations', icon: CheckSquare, label: 'Project Validation', badgeKey: 'projects' },
         { to: '/admin/tracking', icon: List, label: 'Live Projects Tracking' },
-        { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' },
-        { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' }
+        { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals', badgeKey: 'withdrawals' },
+        { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets', badgeKey: 'support' }
       );
     }
   }
 
-
-  // Add "My Profile" to all admin roles as the last item (if it's an admin role)
   if (['SUPER_ADMIN', 'ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(uRole)) {
     adminLinks.push({ to: '/admin/profile', icon: User, label: 'My Profile' });
   }
@@ -135,6 +166,7 @@ export default function Layout() {
                 >
                   <link.icon className="w-5 h-5" />
                   {link.label}
+                  {renderBadge(link.badgeKey)}
                 </NavLink>
               </li>
             ))}
