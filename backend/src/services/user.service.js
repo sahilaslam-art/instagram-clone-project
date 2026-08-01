@@ -4,7 +4,7 @@ import { ZonalAdminProfile } from '../models/zonal-admin.model.js';
 import { AdminProfile } from '../models/admin.model.js';
 import { SubAdminProfile } from '../models/sub-admin.model.js';
 import { WorkerProfile } from '../models/worker.model.js';
-import { KycVerification } from '../models/kyc-verification.model.js';
+import { KYCVerification as KycVerification } from '../models/kyc-verification.model.js';
 
 export const getProfile = async (userId) => {
     const user = await userRepository.findById(userId);
