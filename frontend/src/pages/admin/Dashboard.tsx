@@ -70,15 +70,6 @@ export default function AdminDashboard() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Pending Actions Required</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              
-              <StatCard 
-                icon={Shield} 
-                title="Staff Verifications" 
-                value={stats.pendingApprovals.staff} 
-                colorClass="bg-red-50 text-red-600"
-                linkTo="/admin/staff-verification"
-              />
-
               <StatCard 
                 icon={CheckSquare} 
                 title="Customer/Owner KYC" 

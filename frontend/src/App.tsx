@@ -36,7 +36,6 @@ import AdminSupport from './pages/admin/Support';
 import AdminWithdrawals from './pages/admin/Withdrawals';
 import AdminStaffList from './pages/admin/StaffList';
 import AdminStaffDetails from './pages/admin/StaffDetails';
-import AdminStaffVerification from './pages/admin/StaffVerification';
 import AdminProfile from './pages/admin/Profile';
 
 export default function App() {
@@ -76,7 +75,6 @@ export default function App() {
               <Route path="withdrawals" element={<AdminWithdrawals />} />
               <Route path="staff/:role" element={<AdminStaffList />} />
               <Route path="staff-details/:userId" element={<AdminStaffDetails />} />
-              <Route path="staff-verification" element={<AdminStaffVerification />} />
               <Route path="profile" element={<AdminProfile />} />
             </Route>
 

@@ -33,6 +33,26 @@ export default function AdminStaffDetails() {
     }
   };
 
+  const handleVerify = async (kycId: string, status: 'Verified' | 'Rejected') => {
+    let rejectionReason;
+    if (status === 'Rejected') {
+      rejectionReason = window.prompt('Please enter a rejection reason:');
+      if (!rejectionReason) return;
+    }
+
+    try {
+      setLoading(true);
+      await api.put(`/admin/staff-verification/${kycId}/review`, { status, rejectionReason });
+      alert(`Staff member ${status.toLowerCase()} successfully!`);
+      fetchDetails(userId!);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to update verification status');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   if (currentUser?.role.toUpperCase() !== 'SUPER_ADMIN') {
     return <div className="p-10 text-center text-red-500">Access Denied. Super Admin only.</div>;
   }
@@ -166,6 +186,28 @@ export default function AdminStaffDetails() {
                 No KYC documents uploaded yet.
               </div>
             )}
+            
+            {kyc && user.kycStatus === 'Pending' && (
+              <div className="mt-6 pt-6 border-t border-gray-200 flex justify-end gap-3">
+                <button
+                  onClick={() => handleVerify(kyc._id, 'Rejected')}
+                  disabled={loading}
+                  className="px-6 py-2.5 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <XCircle className="w-5 h-5" />
+                  Reject
+                </button>
+                <button
+                  onClick={() => handleVerify(kyc._id, 'Verified')}
+                  disabled={loading}
+                  className="px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  Approve Verification
+                </button>
+              </div>
+            )}
+
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">

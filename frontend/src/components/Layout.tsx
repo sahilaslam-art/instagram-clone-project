@@ -100,7 +100,6 @@ export default function Layout() {
       { to: '/admin/staff/admin', icon: Users, label: 'Admins' },
       { to: '/admin/staff/sub_admin', icon: Users, label: 'Sub-Admins' },
       { to: '/admin/staff/worker', icon: Users, label: 'Workers' },
-      { to: '/admin/staff-verification', icon: CheckSquare, label: 'Staff Verification', badgeKey: 'staff' },
       { to: '/admin/customers', icon: Users, label: 'Customer Verification', badgeKey: 'customersAndOwners' },
       { to: '/admin/owners', icon: Users, label: 'Owner Verification' },
       { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates', badgeKey: 'profileUpdates' },
@@ -112,10 +111,6 @@ export default function Layout() {
   } else if (['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(uRole)) {
     if (currentUser.kycStatus === 'Verified') {
       adminLinks.push({ to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' });
-      
-      if (['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN'].includes(uRole)) {
-        adminLinks.push({ to: '/admin/staff-verification', icon: Users, label: 'Staff Verification', badgeKey: 'staff' });
-      }
       
       adminLinks.push(
         { to: '/admin/customers', icon: Users, label: 'Customer Verification', badgeKey: 'customersAndOwners' },
