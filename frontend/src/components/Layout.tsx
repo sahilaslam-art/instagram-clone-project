@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import api from '../services/api';
 import { 
   LogOut, LayoutDashboard, Briefcase, ShoppingCart, TrendingUp, 
-  Wallet, User, HelpCircle, CheckSquare, List, Users, HandCoins
+  Wallet, User, HelpCircle, CheckSquare, List, Users, HandCoins, ShieldAlert
 } from 'lucide-react';
 
 export default function Layout() {
@@ -16,6 +16,8 @@ export default function Layout() {
   useEffect(() => {
     if (!isLoading && !currentUser) {
       navigate('/');
+    } else if (currentUser && (currentUser.accountStatus === 'Suspended' || currentUser.accountStatus === 'Hold')) {
+      navigate('/restricted-access');
     }
   }, [currentUser, isLoading, navigate]);
 
@@ -107,6 +109,7 @@ export default function Layout() {
       { to: '/admin/tracking', icon: List, label: 'Live Projects Tracking' },
       { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals', badgeKey: 'withdrawals' },
       { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets', badgeKey: 'support' },
+      { to: '/admin/restricted-accounts', icon: ShieldAlert, label: 'Restricted Accounts' },
     ];
   } else if (['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(uRole)) {
     if (currentUser.kycStatus === 'Verified') {

@@ -119,8 +119,8 @@ export default function AdminCustomers() {
                 if (tab === 'REGISTERED') return customer.kycStatus === 'Incomplete';
                 if (tab === 'PENDING') return customer.kycStatus === 'Pending';
                 if (tab === 'DENIED') return customer.kycStatus === 'Rejected';
-                if (tab === 'VERIFIED') return customer.kycStatus === 'Verified';
-                if (tab === 'SUSPENDED') return customer.accountStatus === 'Inactive' || customer.kycStatus === 'Suspended';
+                if (tab === 'VERIFIED') return customer.kycStatus === 'Verified' && customer.accountStatus === 'Active';
+                if (tab === 'SUSPENDED') return customer.accountStatus === 'Suspended' || customer.accountStatus === 'Hold';
                 return true;
               });
 
@@ -139,16 +139,18 @@ export default function AdminCustomers() {
                   <td className="px-6 py-4 text-gray-500">{customer.mobileNumber}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                      customer.accountStatus === 'Suspended' ? 'bg-red-100 text-red-700' :
+                      customer.accountStatus === 'Hold' ? 'bg-amber-100 text-amber-700' :
                       customer.kycStatus === 'Verified' ? 'bg-green-100 text-green-700' :
                       customer.kycStatus === 'Rejected' ? 'bg-red-100 text-red-700' :
                       'bg-amber-100 text-amber-700'
                     }`}>
-                      {customer.kycStatus}
+                      {customer.accountStatus === 'Active' ? customer.kycStatus : customer.accountStatus}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {tab === 'PENDING' && (
-                      <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-2 items-center">
+                      {tab === 'PENDING' && (
                         <button 
                           onClick={() => {
                             const kyc = pendingKycs.find(k => k.userId?._id === customer._id);
@@ -159,35 +161,19 @@ export default function AdminCustomers() {
                         >
                           View Profile & Docs
                         </button>
-                      </div>
-                    )}
-                    {tab === 'VERIFIED' && customer.accountStatus !== 'Inactive' && (
-                      <button 
-                        onClick={() => handleStatusUpdate(customer._id, 'Inactive', 'Verified')}
+                      )}
+                      
+                      <select 
+                        className="text-xs border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
+                        value={customer.accountStatus || 'Active'}
+                        onChange={(e) => handleStatusUpdate(customer._id, e.target.value, customer.kycStatus)}
                         disabled={loading}
-                        className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
                       >
-                        Suspend
-                      </button>
-                    )}
-                    {tab === 'SUSPENDED' && (
-                      <div className="flex justify-end gap-2">
-                        <button 
-                          onClick={() => handleStatusUpdate(customer._id, 'Active', 'Pending')}
-                          disabled={loading}
-                          className="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-sm font-medium hover:bg-amber-100 transition-colors disabled:opacity-50"
-                        >
-                          To Pending
-                        </button>
-                        <button 
-                          onClick={() => handleStatusUpdate(customer._id, 'Active', 'Verified')}
-                          disabled={loading}
-                          className="px-3 py-1 bg-green-50 text-green-600 border border-green-200 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors disabled:opacity-50"
-                        >
-                          To Verified
-                        </button>
-                      </div>
-                    )}
+                        <option value="Active">Mark Active</option>
+                        <option value="Hold">Put On Hold</option>
+                        <option value="Suspended">Suspend</option>
+                      </select>
+                    </div>
                   </td>
                 </tr>
               ));

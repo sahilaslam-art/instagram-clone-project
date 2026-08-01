@@ -125,3 +125,12 @@ export const updateUserStatus = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getRestrictedAccounts = async (req, res, next) => {
+    try {
+        const restricted = await userService.getRestrictedAccounts();
+        return sendResponse(res, 200, true, 'Restricted Accounts Retrieved Successfully', restricted);
+    } catch (error) {
+        next(error);
+    }
+};

@@ -42,3 +42,11 @@ export const countAll = async () => {
 export const countByRole = async (role) => {
     return await User.countDocuments({ role });
 };
+
+export const updateAccountStatus = async (id, status) => {
+    return await User.findByIdAndUpdate(id, { accountStatus: status }, { new: true }).select('-password');
+};
+
+export const findByAccountStatusIn = async (statuses) => {
+    return await User.find({ accountStatus: { $in: statuses } }).select('-password').sort('-updatedAt');
+};

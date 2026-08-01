@@ -119,8 +119,8 @@ export default function AdminOwners() {
                 if (tab === 'REGISTERED') return owner.kycStatus === 'Incomplete';
                 if (tab === 'PENDING') return owner.kycStatus === 'Pending';
                 if (tab === 'DENIED') return owner.kycStatus === 'Rejected';
-                if (tab === 'VERIFIED') return owner.kycStatus === 'Verified';
-                if (tab === 'SUSPENDED') return owner.accountStatus === 'Inactive' || owner.kycStatus === 'Suspended';
+                if (tab === 'VERIFIED') return owner.kycStatus === 'Verified' && owner.accountStatus === 'Active';
+                if (tab === 'SUSPENDED') return owner.accountStatus === 'Suspended' || owner.accountStatus === 'Hold';
                 return true;
               });
 
@@ -139,16 +139,18 @@ export default function AdminOwners() {
                   <td className="px-6 py-4 text-gray-500">{owner.mobileNumber}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                      owner.accountStatus === 'Suspended' ? 'bg-red-100 text-red-700' :
+                      owner.accountStatus === 'Hold' ? 'bg-amber-100 text-amber-700' :
                       owner.kycStatus === 'Verified' ? 'bg-green-100 text-green-700' :
                       owner.kycStatus === 'Rejected' ? 'bg-red-100 text-red-700' :
                       'bg-amber-100 text-amber-700'
                     }`}>
-                      {owner.kycStatus}
+                      {owner.accountStatus === 'Active' ? owner.kycStatus : owner.accountStatus}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {tab === 'PENDING' && (
-                      <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-2 items-center">
+                      {tab === 'PENDING' && (
                         <button 
                           onClick={() => {
                             const kyc = pendingKycs.find(k => k.userId?._id === owner._id);
@@ -159,35 +161,19 @@ export default function AdminOwners() {
                         >
                           View Profile & Docs
                         </button>
-                      </div>
-                    )}
-                    {tab === 'VERIFIED' && owner.accountStatus !== 'Inactive' && (
-                      <button 
-                        onClick={() => handleStatusUpdate(owner._id, 'Inactive', 'Verified')}
+                      )}
+                      
+                      <select 
+                        className="text-xs border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
+                        value={owner.accountStatus || 'Active'}
+                        onChange={(e) => handleStatusUpdate(owner._id, e.target.value, owner.kycStatus)}
                         disabled={loading}
-                        className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
                       >
-                        Suspend
-                      </button>
-                    )}
-                    {tab === 'SUSPENDED' && (
-                      <div className="flex justify-end gap-2">
-                        <button 
-                          onClick={() => handleStatusUpdate(owner._id, 'Active', 'Pending')}
-                          disabled={loading}
-                          className="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-sm font-medium hover:bg-amber-100 transition-colors disabled:opacity-50"
-                        >
-                          To Pending
-                        </button>
-                        <button 
-                          onClick={() => handleStatusUpdate(owner._id, 'Active', 'Verified')}
-                          disabled={loading}
-                          className="px-3 py-1 bg-green-50 text-green-600 border border-green-200 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors disabled:opacity-50"
-                        >
-                          To Verified
-                        </button>
-                      </div>
-                    )}
+                        <option value="Active">Mark Active</option>
+                        <option value="Hold">Put On Hold</option>
+                        <option value="Suspended">Suspend</option>
+                      </select>
+                    </div>
                   </td>
                 </tr>
               ));

@@ -25,6 +25,9 @@ const adminOnly = [authenticate, authorizeRole('Super_Admin', 'Sub_Admin')];
 // Dashboard
 router.get('/dashboard', adminOnly, dashboardController.getAdminDashboard);
 
+// Restricted Accounts (Super_Admin ONLY)
+router.get('/restricted-accounts', authenticate, authorizeRole('Super_Admin'), userController.getRestrictedAccounts);
+
 // Sub-Admin Management (Super_Admin ONLY)
 // Uses existing authorizeRole logic but requires authenticate
 router.get('/sub-admins', authenticate, authorizeRole('Super_Admin'), userController.getAllSubAdmins);

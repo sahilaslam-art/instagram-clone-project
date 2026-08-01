@@ -91,13 +91,13 @@ export const reviewKyc = async (kycId, adminId, status, rejectionReason) => {
     const userUpdatePayload = { kycStatus: status };
     
     // Update user's profile with KYC info if verified
-    // Update user's profile with KYC info if verified
     if (status === 'Verified') {
         userUpdatePayload.dateOfBirth = updatedKyc.dateOfBirth;
         userUpdatePayload.gender = updatedKyc.gender;
         userUpdatePayload.address = updatedKyc.address;
         userUpdatePayload.bankInfo = updatedKyc.bankInfo;
         userUpdatePayload.isProfileComplete = true;
+        userUpdatePayload.accountStatus = 'Active'; // Automatically active if approved
     }
     
     await userRepository.updateById(updatedKyc.userId, userUpdatePayload);

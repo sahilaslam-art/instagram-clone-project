@@ -52,6 +52,20 @@ export default function AdminStaffDetails() {
     }
   };
 
+  const handleStatusUpdate = async (newStatus: 'Active' | 'Suspended' | 'Hold') => {
+    if (!window.confirm(`Are you sure you want to change this account's status to ${newStatus}?`)) return;
+    try {
+      setLoading(true);
+      await api.put(`/admin/users/${userId}/status`, { accountStatus: newStatus });
+      alert(`Account status updated to ${newStatus}`);
+      fetchDetails(userId!);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to update account status');
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   if (currentUser?.role.toUpperCase() !== 'SUPER_ADMIN') {
     return <div className="p-10 text-center text-red-500">Access Denied. Super Admin only.</div>;
@@ -130,6 +144,30 @@ export default function AdminStaffDetails() {
                 <p className="text-sm text-gray-500 font-medium mb-1">Phone</p>
                 <p className="text-gray-900">{user.mobileNumber || 'N/A'}</p>
               </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium mb-1">Account Status</p>
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    user.accountStatus === 'Active' ? 'bg-green-100 text-green-800' : 
+                    user.accountStatus === 'Suspended' ? 'bg-red-100 text-red-800' : 
+                    'bg-amber-100 text-amber-800'
+                  }`}>
+                    {user.accountStatus || 'Active'}
+                  </span>
+                  
+                  {/* Action Dropdown for Super Admin */}
+                  <select 
+                    className="text-xs border border-gray-300 rounded-md px-2 py-1 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
+                    value={user.accountStatus || 'Active'}
+                    onChange={(e) => handleStatusUpdate(e.target.value as any)}
+                  >
+                    <option value="Active">Mark Active</option>
+                    <option value="Hold">Put On Hold</option>
+                    <option value="Suspended">Suspend</option>
+                  </select>
+                </div>
+              </div>
+              
               <div>
                 <p className="text-sm text-gray-500 font-medium mb-1">KYC Status</p>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

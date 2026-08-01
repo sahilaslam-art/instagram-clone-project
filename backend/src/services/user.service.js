@@ -165,3 +165,7 @@ export const updateUserStatus = async (userId, accountStatus, kycStatus) => {
     
     return { message: 'User status updated successfully' };
 };
+
+export const getRestrictedAccounts = async () => {
+    return await userRepository.findByAccountStatusIn(['Suspended', 'Hold']);
+};

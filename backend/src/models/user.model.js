@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     },
     accountStatus: { 
         type: String, 
-        enum: ['Active', 'Inactive'], 
+        enum: ['Active', 'Inactive', 'Suspended', 'Hold'], 
         default: 'Active' 
     },
     isEmailVerified: { type: Boolean, default: false },

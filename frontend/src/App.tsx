@@ -37,6 +37,8 @@ import AdminWithdrawals from './pages/admin/Withdrawals';
 import AdminStaffList from './pages/admin/StaffList';
 import AdminStaffDetails from './pages/admin/StaffDetails';
 import AdminProfile from './pages/admin/Profile';
+import RestrictedAccounts from './pages/admin/RestrictedAccounts';
+import RestrictedAccess from './pages/RestrictedAccess';
 
 export default function App() {
   return (
@@ -76,7 +78,10 @@ export default function App() {
               <Route path="staff/:role" element={<AdminStaffList />} />
               <Route path="staff-details/:userId" element={<AdminStaffDetails />} />
               <Route path="profile" element={<AdminProfile />} />
+              <Route path="restricted-accounts" element={<RestrictedAccounts />} />
             </Route>
+
+            <Route path="/restricted-access" element={<RestrictedAccess />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
