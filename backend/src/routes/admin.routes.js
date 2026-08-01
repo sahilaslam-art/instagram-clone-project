@@ -27,7 +27,6 @@ router.get('/dashboard', adminOnly, dashboardController.getAdminDashboard);
 
 // Sub-Admin Management (Super_Admin ONLY)
 // Uses existing authorizeRole logic but requires authenticate
-router.post('/sub-admins', authenticate, authorizeRole('Super_Admin'), userController.promoteToSubAdmin);
 router.get('/sub-admins', authenticate, authorizeRole('Super_Admin'), userController.getAllSubAdmins);
 
 // Admin KYC Submission (All Admins)
@@ -41,9 +40,9 @@ router.put('/staff-verification/:kycId/review', staffKycAuth, validate(updateKyc
 // --- Feature Admin Routes (Role-based access) ---
 
 // KYC / Profile Admin Features
-const customerKycAuth = [authenticate, authorizeFeature('KYC Admin', 'Customer verification and profile update admin')];
-const ownerKycAuth = [authenticate, authorizeFeature('KYC Admin', 'Owner verification and profile update admin')];
-const bothKycAuth = [authenticate, authorizeFeature('KYC Admin', 'Customer verification and profile update admin', 'Owner verification and profile update admin')];
+const customerKycAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker')];
+const ownerKycAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker')];
+const bothKycAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker')];
 
 router.get('/customers', customerKycAuth, userController.getAllCustomers);
 router.get('/owners', ownerKycAuth, userController.getAllOwners);
@@ -54,18 +53,18 @@ router.get('/kyc/pending', bothKycAuth, kycController.getAllPendingKyc);
 router.put('/kyc/:kycId/verify', bothKycAuth, validate(updateKycStatusSchema), kycController.reviewKyc);
 
 // Project Admin Features
-const projectAdminAuth = [authenticate, authorizeFeature('Project Admin', 'Project verification and projects update admin')];
+const projectAdminAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker')];
 router.get('/projects/pending', projectAdminAuth, projectController.getPendingProjects);
 router.get('/projects/active', projectAdminAuth, projectController.getActiveProjects);
 router.put('/projects/:projectId/review', projectAdminAuth, validate(reviewProjectSchema), projectController.reviewProject);
 
 // Finance Admin Features
-const financeAdminAuth = [authenticate, authorizeFeature('Finance Admin', 'Owner / Customer withdrawal manage admin')];
+const financeAdminAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker')];
 router.get('/withdrawals/pending', financeAdminAuth, walletController.getPendingWithdrawals);
 router.put('/withdrawals/:transactionId/process', financeAdminAuth, walletController.processWithdrawal);
 
 // Support Admin Features
-const supportAdminAuth = [authenticate, authorizeFeature('Support Admin', 'Support admin')];
+const supportAdminAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker')];
 router.get('/support', supportAdminAuth, supportController.getAllTickets);
 router.put('/support/:ticketId', supportAdminAuth, validate(respondTicketSchema), supportController.respondToTicket);
 

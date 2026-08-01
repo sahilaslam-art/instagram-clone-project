@@ -80,22 +80,16 @@ export default function Layout() {
         adminLinks.push({ to: '/admin/staff-verification', icon: Users, label: 'Staff Verification' });
       }
       
-      // Add specific links based on feature role
-      const fRole = currentUser.featureRole;
-      if (fRole === 'Customer verification and profile update admin') {
-        adminLinks.push({ to: '/admin/customers', icon: Users, label: 'Customer Verification' });
-        adminLinks.push({ to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' });
-      } else if (fRole === 'Owner verification and profile update admin') {
-        adminLinks.push({ to: '/admin/owners', icon: Users, label: 'Owner Verification' });
-        adminLinks.push({ to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' });
-      } else if (fRole === 'Project verification and projects update admin') {
-        adminLinks.push({ to: '/admin/validations', icon: CheckSquare, label: 'Project Validation' });
-        adminLinks.push({ to: '/admin/tracking', icon: List, label: 'Live Projects Tracking' });
-      } else if (fRole === 'Owner / Customer withdrawal manage admin') {
-        adminLinks.push({ to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' });
-      } else if (fRole === 'Support admin') {
-        adminLinks.push({ to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' });
-      }
+      // Add all operational links for verified admins in the hierarchy
+      adminLinks.push(
+        { to: '/admin/customers', icon: Users, label: 'Customer Verification' },
+        { to: '/admin/owners', icon: Users, label: 'Owner Verification' },
+        { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' },
+        { to: '/admin/validations', icon: CheckSquare, label: 'Project Validation' },
+        { to: '/admin/tracking', icon: List, label: 'Live Projects Tracking' },
+        { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' },
+        { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' }
+      );
     }
   }
 

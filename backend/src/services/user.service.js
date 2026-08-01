@@ -63,16 +63,6 @@ export const getAllSubAdmins = async () => {
     return await userRepository.findAllByRole('Sub_Admin');
 };
 
-export const promoteToSubAdmin = async (userId) => {
-    const user = await userRepository.findById(userId);
-    if (!user) {
-        throw new Error('User not found');
-    }
-    
-    await userRepository.updateById(userId, { role: 'Sub_Admin' });
-    return { message: 'User promoted to Sub-Admin successfully' };
-};
-
 // Admin Methods
 export const getPendingProfileUpdates = async () => {
     return await profileUpdateRequestRepository.findAllPending();

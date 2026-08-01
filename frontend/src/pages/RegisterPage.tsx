@@ -14,7 +14,6 @@ export default function RegisterPage() {
     email: '',
     password: '',
     role: 'Customer', // default
-    featureRole: '',
     domain: '',
     zone: '',
     region: '',
@@ -169,25 +168,6 @@ export default function RegisterPage() {
               </select>
             </div>
 
-            {['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'].includes(formData.role) && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Functional Role (Department)</label>
-                <select
-                  name="featureRole"
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
-                  value={formData.featureRole}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Department</option>
-                  <option value="Owner verification and profile update admin">Owner Verification & Profile</option>
-                  <option value="Customer verification and profile update admin">Customer Verification & Profile</option>
-                  <option value="Project verification and projects update admin">Project Verification & Updates</option>
-                  <option value="Support admin">Support</option>
-                  <option value="Owner / Customer withdrawal manage admin">Withdrawal Management</option>
-                </select>
-              </div>
-            )}
 
             {['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'].includes(formData.role) && (
               <div className="grid grid-cols-2 gap-4">
