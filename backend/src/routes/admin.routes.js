@@ -25,16 +25,18 @@ const adminOnly = [authenticate, authorizeRole('Super_Admin', 'Sub_Admin')];
 // Dashboard
 router.get('/dashboard', adminOnly, dashboardController.getAdminDashboard);
 
-// Restricted Accounts (Super_Admin ONLY)
-router.get('/restricted-accounts', authenticate, authorizeRole('Super_Admin'), userController.getRestrictedAccounts);
+// Restricted Accounts (All Admins)
+const restrictedAccountsAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin')];
+router.get('/restricted-accounts', restrictedAccountsAuth, userController.getRestrictedAccounts);
 
 // Sub-Admin Management (Super_Admin ONLY)
 // Uses existing authorizeRole logic but requires authenticate
 router.get('/sub-admins', authenticate, authorizeRole('Super_Admin'), userController.getAllSubAdmins);
 
-// Hierarchy Staff Management (Super_Admin ONLY)
-router.get('/staff-list/:role', authenticate, authorizeRole('Super_Admin'), userController.getStaffListByRole);
-router.get('/staff-details/:userId', authenticate, authorizeRole('Super_Admin'), userController.getStaffDetails);
+// Hierarchy Staff Management (All Admins can access their subordinates)
+const staffManagementAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin')];
+router.get('/staff-list/:role', staffManagementAuth, userController.getStaffListByRole);
+router.get('/staff-details/:userId', staffManagementAuth, userController.getStaffDetails);
 
 // Admin KYC Submission (All Admins)
 router.post('/kyc/submit', authenticate, validate(submitKycSchema), kycController.submitKyc);

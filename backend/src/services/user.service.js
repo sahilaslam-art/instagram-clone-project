@@ -68,9 +68,43 @@ export const getAllSubAdmins = async () => {
     return await userRepository.findAllByRole('Sub_Admin');
 };
 
-export const getStaffByRole = async (role) => {
+const getAuthorizedStaffUserIds = async (currentUser, targetRole) => {
+    if (currentUser.role === 'Super_Admin') return null; // No filtering needed
+
+    if (currentUser.role === 'Zonal_Admin' && targetRole === 'Admin') {
+        const adminProfile = await ZonalAdminProfile.findOne({ userId: currentUser._id });
+        if (!adminProfile) return [];
+        const matches = await AdminProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone }).select('userId');
+        return matches.map(m => m.userId.toString());
+    }
+
+    if (currentUser.role === 'Admin' && targetRole === 'Sub_Admin') {
+        const adminProfile = await AdminProfile.findOne({ userId: currentUser._id });
+        if (!adminProfile) return [];
+        const matches = await SubAdminProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone, region: adminProfile.region }).select('userId');
+        return matches.map(m => m.userId.toString());
+    }
+
+    if (currentUser.role === 'Sub_Admin' && targetRole === 'Worker') {
+        const adminProfile = await SubAdminProfile.findOne({ userId: currentUser._id });
+        if (!adminProfile) return [];
+        const matches = await WorkerProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone, region: adminProfile.region, category: adminProfile.category }).select('userId');
+        return matches.map(m => m.userId.toString());
+    }
+
+    return []; // For any other combination, no subordinates
+};
+
+export const getStaffByRole = async (role, currentUser) => {
     // role is one of: Zonal_Admin, Admin, Sub_Admin, Worker
-    const users = await userRepository.findAllByRole(role);
+    const authorizedUserIds = await getAuthorizedStaffUserIds(currentUser, role);
+    
+    let users = await userRepository.findAllByRole(role);
+
+    // Apply geographic filter if applicable
+    if (authorizedUserIds !== null) {
+        users = users.filter(u => authorizedUserIds.includes(u._id.toString()));
+    }
     
     // Attach profile mappings
     let profiles = [];
@@ -93,9 +127,17 @@ export const getStaffByRole = async (role) => {
     });
 };
 
-export const getStaffDetails = async (userId) => {
+export const getStaffDetails = async (userId, currentUser) => {
     const user = await userRepository.findById(userId);
     if (!user) throw new Error('User not found');
+
+    // Security Check: Ensure currentUser can view this staff member
+    if (currentUser.role !== 'Super_Admin') {
+        const authorizedUserIds = await getAuthorizedStaffUserIds(currentUser, user.role);
+        if (authorizedUserIds !== null && !authorizedUserIds.includes(user._id.toString())) {
+            throw new Error('Not authorized to view this staff member');
+        }
+    }
 
     const u = user.toObject();
     const role = u.role;
@@ -151,12 +193,22 @@ export const reviewProfileUpdate = async (requestId, status, rejectionReason) =>
     return { message: `Profile update request ${status.toLowerCase()}` };
 };
 
-export const updateUserStatus = async (userId, accountStatus, kycStatus) => {
+export const updateUserStatus = async (userId, accountStatus, kycStatus, currentUser) => {
     const user = await userRepository.findById(userId);
     if (!user) {
         throw new Error('User not found');
     }
     
+    // Security check
+    if (currentUser && currentUser.role !== 'Super_Admin') {
+        if (user.role !== 'Customer' && user.role !== 'Owner') {
+            const authorizedUserIds = await getAuthorizedStaffUserIds(currentUser, user.role);
+            if (authorizedUserIds === null || !authorizedUserIds.includes(user._id.toString())) {
+                throw new Error('Not authorized to update status for this staff member');
+            }
+        }
+    }
+
     const updateData = {};
     if (accountStatus) updateData.accountStatus = accountStatus;
     if (kycStatus) updateData.kycStatus = kycStatus;
@@ -166,6 +218,29 @@ export const updateUserStatus = async (userId, accountStatus, kycStatus) => {
     return { message: 'User status updated successfully' };
 };
 
-export const getRestrictedAccounts = async () => {
-    return await userRepository.findByAccountStatusIn(['Suspended', 'Hold']);
+export const getRestrictedAccounts = async (currentUser) => {
+    const restricted = await userRepository.findByAccountStatusIn(['Suspended', 'Hold']);
+    
+    if (currentUser.role === 'Super_Admin') {
+        return restricted;
+    }
+
+    // Filter restricted accounts for other admins
+    // They can see all Customers and Owners, but only their authorized subordinate staff
+    
+    let targetStaffRole = null;
+    if (currentUser.role === 'Zonal_Admin') targetStaffRole = 'Admin';
+    if (currentUser.role === 'Admin') targetStaffRole = 'Sub_Admin';
+    if (currentUser.role === 'Sub_Admin') targetStaffRole = 'Worker';
+
+    let authorizedStaffIds = [];
+    if (targetStaffRole) {
+        authorizedStaffIds = await getAuthorizedStaffUserIds(currentUser, targetStaffRole);
+    }
+
+    return restricted.filter(user => {
+        if (user.role === 'Customer' || user.role === 'Owner') return true;
+        if (user.role === targetStaffRole) return authorizedStaffIds.includes(user._id.toString());
+        return false;
+    });
 };

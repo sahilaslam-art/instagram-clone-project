@@ -124,6 +124,18 @@ export default function Layout() {
         { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals', badgeKey: 'withdrawals' },
         { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets', badgeKey: 'support' }
       );
+      
+      if (uRole === 'ZONAL_ADMIN') {
+        adminLinks.push({ to: '/admin/staff/admin', icon: Users, label: 'Admins' });
+      } else if (uRole === 'ADMIN') {
+        adminLinks.push({ to: '/admin/staff/sub_admin', icon: Users, label: 'Sub-Admins' });
+      } else if (uRole === 'SUB_ADMIN') {
+        adminLinks.push({ to: '/admin/staff/worker', icon: Users, label: 'Workers' });
+      }
+      
+      if (['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN'].includes(uRole)) {
+        adminLinks.push({ to: '/admin/restricted-accounts', icon: ShieldAlert, label: 'Restricted Accounts' });
+      }
     }
   }
 

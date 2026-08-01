@@ -73,7 +73,7 @@ export const getStaffListByRole = async (req, res, next) => {
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join('_');
             
-        const staff = await userService.getStaffByRole(formattedRole);
+        const staff = await userService.getStaffByRole(formattedRole, req.user);
         return sendResponse(res, 200, true, `${formattedRole} Retrieved Successfully`, staff);
     } catch (error) {
         next(error);
@@ -82,7 +82,7 @@ export const getStaffListByRole = async (req, res, next) => {
 
 export const getStaffDetails = async (req, res, next) => {
     try {
-        const details = await userService.getStaffDetails(req.params.userId);
+        const details = await userService.getStaffDetails(req.params.userId, req.user);
         return sendResponse(res, 200, true, 'Staff Details Retrieved Successfully', details);
     } catch (error) {
         next(error);
@@ -116,7 +116,7 @@ export const updateUserStatus = async (req, res, next) => {
     try {
         const userId = req.params.userId;
         const { accountStatus, kycStatus } = req.body;
-        const result = await userService.updateUserStatus(userId, accountStatus, kycStatus);
+        const result = await userService.updateUserStatus(userId, accountStatus, kycStatus, req.user);
         return sendResponse(res, 200, true, result.message, result);
     } catch (error) {
         if (error.message === 'User not found') {
@@ -128,7 +128,7 @@ export const updateUserStatus = async (req, res, next) => {
 
 export const getRestrictedAccounts = async (req, res, next) => {
     try {
-        const restricted = await userService.getRestrictedAccounts();
+        const restricted = await userService.getRestrictedAccounts(req.user);
         return sendResponse(res, 200, true, 'Restricted Accounts Retrieved Successfully', restricted);
     } catch (error) {
         next(error);
