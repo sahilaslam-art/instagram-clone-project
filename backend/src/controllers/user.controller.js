@@ -64,6 +64,31 @@ export const getAllSubAdmins = async (req, res, next) => {
     }
 };
 
+export const getStaffListByRole = async (req, res, next) => {
+    try {
+        const role = req.params.role;
+        // capitalize correctly (e.g. zonal_admin -> Zonal_Admin)
+        const formattedRole = role
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join('_');
+            
+        const staff = await userService.getStaffByRole(formattedRole);
+        return sendResponse(res, 200, true, `${formattedRole} Retrieved Successfully`, staff);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getStaffDetails = async (req, res, next) => {
+    try {
+        const details = await userService.getStaffDetails(req.params.userId);
+        return sendResponse(res, 200, true, 'Staff Details Retrieved Successfully', details);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const getPendingProfileUpdates = async (req, res, next) => {
     try {
         const requests = await userService.getPendingProfileUpdates();

@@ -34,7 +34,8 @@ import AdminValidations from './pages/admin/Validations';
 import AdminTracking from './pages/admin/Tracking';
 import AdminSupport from './pages/admin/Support';
 import AdminWithdrawals from './pages/admin/Withdrawals';
-import AdminSubAdmins from './pages/admin/SubAdmins';
+import AdminStaffList from './pages/admin/StaffList';
+import AdminStaffDetails from './pages/admin/StaffDetails';
 import AdminStaffVerification from './pages/admin/StaffVerification';
 import AdminProfile from './pages/admin/Profile';
 
@@ -73,7 +74,8 @@ export default function App() {
               <Route path="tracking" element={<AdminTracking />} />
               <Route path="support" element={<AdminSupport />} />
               <Route path="withdrawals" element={<AdminWithdrawals />} />
-              <Route path="sub-admins" element={<AdminSubAdmins />} />
+              <Route path="staff/:role" element={<AdminStaffList />} />
+              <Route path="staff-details/:userId" element={<AdminStaffDetails />} />
               <Route path="staff-verification" element={<AdminStaffVerification />} />
               <Route path="profile" element={<AdminProfile />} />
             </Route>

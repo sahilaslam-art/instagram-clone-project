@@ -29,6 +29,10 @@ router.get('/dashboard', adminOnly, dashboardController.getAdminDashboard);
 // Uses existing authorizeRole logic but requires authenticate
 router.get('/sub-admins', authenticate, authorizeRole('Super_Admin'), userController.getAllSubAdmins);
 
+// Hierarchy Staff Management (Super_Admin ONLY)
+router.get('/staff-list/:role', authenticate, authorizeRole('Super_Admin'), userController.getStaffListByRole);
+router.get('/staff-details/:userId', authenticate, authorizeRole('Super_Admin'), userController.getStaffDetails);
+
 // Admin KYC Submission (All Admins)
 router.post('/kyc/submit', authenticate, validate(submitKycSchema), kycController.submitKyc);
 

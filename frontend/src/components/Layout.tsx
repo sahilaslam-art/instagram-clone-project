@@ -62,8 +62,11 @@ export default function Layout() {
   if (uRole === 'SUPER_ADMIN') {
     adminLinks = [
       { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { to: '/admin/sub-admins', icon: Users, label: 'Sub-Admins' },
-      { to: '/admin/staff-verification', icon: Users, label: 'Staff Verification' },
+      { to: '/admin/staff/zonal_admin', icon: Users, label: 'Zonal Admins' },
+      { to: '/admin/staff/admin', icon: Users, label: 'Admins' },
+      { to: '/admin/staff/sub_admin', icon: Users, label: 'Sub-Admins' },
+      { to: '/admin/staff/worker', icon: Users, label: 'Workers' },
+      { to: '/admin/staff-verification', icon: CheckSquare, label: 'Staff Verification' },
       { to: '/admin/customers', icon: Users, label: 'Customer Verification' },
       { to: '/admin/owners', icon: Users, label: 'Owner Verification' },
       { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' },
