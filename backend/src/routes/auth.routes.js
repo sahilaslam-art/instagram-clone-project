@@ -13,8 +13,8 @@ const authLimiter = rateLimit({
 
 const router = express.Router();
 
-router.post('/register', authLimiter, validate(registerSchema), authController.register);
-router.post('/login', authLimiter, validate(loginSchema), authController.login);
+router.post('/register', validate(registerSchema), authController.register);
+router.post('/login', validate(loginSchema), authController.login);
 router.post('/verify-mobile', validate(verifyOtpSchema), authController.verifyMobile);
 router.post('/verify-email', validate(verifyOtpSchema), authController.verifyEmail);
 router.get('/refresh', authenticate, authController.refresh);

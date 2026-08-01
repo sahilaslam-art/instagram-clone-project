@@ -92,6 +92,31 @@ export const loginUser = async (identifier, password) => {
         { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
+    // Fetch admin profile details if applicable
+    let profileDetails = {};
+    if (['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'].includes(user.role)) {
+        try {
+            let profile = null;
+            if (user.role === 'Zonal_Admin') profile = await ZonalAdminProfile.findOne({ userId: user._id });
+            if (user.role === 'Admin') profile = await AdminProfile.findOne({ userId: user._id });
+            if (user.role === 'Sub_Admin') profile = await SubAdminProfile.findOne({ userId: user._id });
+            if (user.role === 'Worker') profile = await WorkerProfile.findOne({ userId: user._id });
+
+            if (profile) {
+                profileDetails = {
+                    featureRole: profile.featureRole,
+                    domain: profile.domain,
+                    zone: profile.zone,
+                    region: profile.region,
+                    category: profile.category,
+                    speciality: profile.speciality
+                };
+            }
+        } catch (error) {
+            console.error('Error fetching admin profile', error);
+        }
+    }
+
     return {
         token,
         user: {
@@ -100,7 +125,8 @@ export const loginUser = async (identifier, password) => {
             email: user.email,
             role: user.role,
             isProfileComplete: user.isProfileComplete,
-            kycStatus: user.kycStatus
+            kycStatus: user.kycStatus,
+            ...profileDetails
         }
     };
 };
@@ -121,6 +147,31 @@ export const refreshToken = async (userId) => {
         { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
+    // Fetch admin profile details if applicable
+    let profileDetails = {};
+    if (['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'].includes(user.role)) {
+        try {
+            let profile = null;
+            if (user.role === 'Zonal_Admin') profile = await ZonalAdminProfile.findOne({ userId: user._id });
+            if (user.role === 'Admin') profile = await AdminProfile.findOne({ userId: user._id });
+            if (user.role === 'Sub_Admin') profile = await SubAdminProfile.findOne({ userId: user._id });
+            if (user.role === 'Worker') profile = await WorkerProfile.findOne({ userId: user._id });
+
+            if (profile) {
+                profileDetails = {
+                    featureRole: profile.featureRole,
+                    domain: profile.domain,
+                    zone: profile.zone,
+                    region: profile.region,
+                    category: profile.category,
+                    speciality: profile.speciality
+                };
+            }
+        } catch (error) {
+            console.error('Error fetching admin profile', error);
+        }
+    }
+
     return {
         token,
         user: {
@@ -129,7 +180,8 @@ export const refreshToken = async (userId) => {
             email: user.email,
             role: user.role,
             isProfileComplete: user.isProfileComplete,
-            kycStatus: user.kycStatus
+            kycStatus: user.kycStatus,
+            ...profileDetails
         }
     };
 };

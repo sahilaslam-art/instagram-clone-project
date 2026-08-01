@@ -24,9 +24,9 @@ export default function OwnerProfile() {
       ifscCode: ''
     },
     documents: {
-      identityProof: 'https://example.com/id-proof.jpg',
-      addressProof: 'https://example.com/address-proof.jpg',
-      bankProof: 'https://example.com/bank-proof.jpg'
+      identityProof: '',
+      addressProof: '',
+      bankProof: ''
     }
   });
 
@@ -57,6 +57,29 @@ export default function OwnerProfile() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check size (e.g. limit to 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('File size should not exceed 2MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setKycData(prev => ({
+        ...prev,
+        documents: {
+          ...prev.documents,
+          [field]: reader.result as string
+        }
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleKycSubmit = async (e: React.FormEvent) => {
@@ -223,10 +246,75 @@ export default function OwnerProfile() {
               </div>
 
               <div className="pt-4 border-t border-gray-100">
-                <h3 className="font-medium text-gray-900 mb-4">Documents</h3>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600 flex items-center gap-3">
-                  <Upload className="w-5 h-5 text-gray-400" />
-                  For testing purposes, dummy document URLs are automatically populated.
+                <h3 className="font-medium text-gray-900 mb-4">Documents (Max 2MB per file)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  
+                  {/* Identity Proof (Aadhaar/ID) */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Identity Proof (Aadhaar / Voter ID)</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-emerald-500 transition-colors">
+                      <input 
+                        type="file" 
+                        accept="image/*,.pdf" 
+                        className="hidden" 
+                        id="identityProofUpload"
+                        onChange={(e) => handleFileUpload(e, 'identityProof')}
+                        required
+                      />
+                      <label htmlFor="identityProofUpload" className="cursor-pointer flex flex-col items-center">
+                        <Upload className="w-8 h-8 text-emerald-500 mb-2" />
+                        <span className="text-sm text-gray-600">Click to upload</span>
+                        <span className="text-xs text-gray-400 mt-1">
+                          {kycData.documents.identityProof ? 'File selected ✓' : 'JPEG, PNG or PDF'}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Address Proof (Pan Card) */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Address Proof (PAN Card / Utility Bill)</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-emerald-500 transition-colors">
+                      <input 
+                        type="file" 
+                        accept="image/*,.pdf" 
+                        className="hidden" 
+                        id="addressProofUpload"
+                        onChange={(e) => handleFileUpload(e, 'addressProof')}
+                        required
+                      />
+                      <label htmlFor="addressProofUpload" className="cursor-pointer flex flex-col items-center">
+                        <Upload className="w-8 h-8 text-emerald-500 mb-2" />
+                        <span className="text-sm text-gray-600">Click to upload</span>
+                        <span className="text-xs text-gray-400 mt-1">
+                          {kycData.documents.addressProof ? 'File selected ✓' : 'JPEG, PNG or PDF'}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Bank Proof (Passbook) */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Bank Proof (Passbook / Cancelled Cheque)</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-emerald-500 transition-colors">
+                      <input 
+                        type="file" 
+                        accept="image/*,.pdf" 
+                        className="hidden" 
+                        id="bankProofUpload"
+                        onChange={(e) => handleFileUpload(e, 'bankProof')}
+                        required
+                      />
+                      <label htmlFor="bankProofUpload" className="cursor-pointer flex flex-col items-center">
+                        <Upload className="w-8 h-8 text-emerald-500 mb-2" />
+                        <span className="text-sm text-gray-600">Click to upload</span>
+                        <span className="text-xs text-gray-400 mt-1">
+                          {kycData.documents.bankProof ? 'File selected ✓' : 'JPEG, PNG or PDF'}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 

@@ -6,6 +6,12 @@ export const authorizeRole = (...allowedRoles) => {
             return sendResponse(res, 403, false, 'Forbidden Response: Role not found');
         }
 
+        const hierarchyAdmins = ['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'];
+
+        if (hierarchyAdmins.includes(req.user.role) && req.user.kycStatus !== 'Verified') {
+            return sendResponse(res, 403, false, 'Forbidden Response: Profile verification pending');
+        }
+
         if (!allowedRoles.includes(req.user.role)) {
             return sendResponse(res, 403, false, 'Forbidden Response: Insufficient permissions');
         }
@@ -20,13 +26,19 @@ export const authorizeFeature = (...requiredFeatureRoles) => {
             return sendResponse(res, 403, false, 'Forbidden Response: Role not found');
         }
 
-        // Super_Admin and Sub_Admin can access all features
-        if (['Super_Admin', 'Sub_Admin'].includes(req.user.role)) {
+        const hierarchyAdmins = ['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'];
+
+        if (hierarchyAdmins.includes(req.user.role) && req.user.kycStatus !== 'Verified') {
+            return sendResponse(res, 403, false, 'Forbidden Response: Profile verification pending');
+        }
+
+        // Super_Admin can access all features
+        if (['Super_Admin'].includes(req.user.role)) {
             return next();
         }
 
-        // Feature_Admin must have one of the matching featureRoles
-        if (req.user.role === 'Feature_Admin' && requiredFeatureRoles.includes(req.user.featureRole)) {
+        // Feature-based admins must have one of the matching featureRoles
+        if (hierarchyAdmins.includes(req.user.role) && requiredFeatureRoles.includes(req.user.featureRole)) {
             return next();
         }
 

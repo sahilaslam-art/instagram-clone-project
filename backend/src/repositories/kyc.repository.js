@@ -12,14 +12,6 @@ export const findAllPending = async () => {
     return await KYCVerification.find({ verificationStatus: 'Pending', userRole: { $in: ['Customer', 'Owner'] } }).populate('userId', 'fullName email role').sort('createdAt');
 };
 
-export const findAllFeatureAdminsPendingSubAdmin = async () => {
-    return await KYCVerification.find({ userRole: 'Feature_Admin', subAdminDecision: 'Pending' }).populate('userId', 'fullName email role').sort('createdAt');
-};
-
-export const findAllFeatureAdminsForSuperAdmin = async () => {
-    return await KYCVerification.find({ userRole: 'Feature_Admin', subAdminDecision: { $in: ['Verified', 'Rejected'] }, verificationStatus: 'Pending' }).populate('userId', 'fullName email role').sort('createdAt');
-};
-
 export const create = async (kycData) => {
     const kyc = new KYCVerification(kycData);
     return await kyc.save();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, X } from 'lucide-react';
 import api from '../../services/api';
 
 export default function AdminCustomers() {
@@ -7,6 +7,8 @@ export default function AdminCustomers() {
   const [pendingKycs, setPendingKycs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<'REGISTERED' | 'PENDING' | 'DENIED' | 'VERIFIED' | 'SUSPENDED'>('REGISTERED');
+  const [selectedKyc, setSelectedKyc] = useState<any | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -46,6 +48,7 @@ export default function AdminCustomers() {
       setLoading(true);
       await api.put(`/admin/kyc/${kyc._id}/verify`, { status, rejectionReason });
       alert(`User ${status.toLowerCase()} successfully!`);
+      setSelectedKyc(null);
       fetchData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to update verification status');
@@ -147,18 +150,14 @@ export default function AdminCustomers() {
                     {tab === 'PENDING' && (
                       <div className="flex justify-end gap-2">
                         <button 
-                          onClick={() => handleVerify(customer._id, 'Verified')}
-                          disabled={loading}
-                          className="p-1 text-green-600 hover:bg-green-50 rounded disabled:opacity-50" title="Approve"
+                          onClick={() => {
+                            const kyc = pendingKycs.find(k => k.userId?._id === customer._id);
+                            if (kyc) setSelectedKyc(kyc);
+                            else alert('KYC data not found for this user');
+                          }}
+                          className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
                         >
-                          <CheckCircle className="w-5 h-5" />
-                        </button>
-                        <button 
-                          onClick={() => handleVerify(customer._id, 'Rejected')}
-                          disabled={loading}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded disabled:opacity-50" title="Reject"
-                        >
-                          <XCircle className="w-5 h-5" />
+                          View Profile & Docs
                         </button>
                       </div>
                     )}
@@ -196,6 +195,105 @@ export default function AdminCustomers() {
           </tbody>
         </table>
       </div>
+
+      {/* Document Review Modal */}
+      {selectedKyc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl border border-gray-200 overflow-hidden my-8">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gray-50">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-blue-600" />
+                Customer Review: {selectedKyc.fullName}
+              </h2>
+              <button 
+                onClick={() => setSelectedKyc(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Personal Info</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 space-y-2 text-sm">
+                    <p><span className="font-medium text-gray-700">DOB:</span> {new Date(selectedKyc.dateOfBirth).toLocaleDateString()}</p>
+                    <p><span className="font-medium text-gray-700">Gender:</span> {selectedKyc.gender}</p>
+                    <p><span className="font-medium text-gray-700">Address:</span> {selectedKyc.address}</p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Bank Info</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 space-y-2 text-sm">
+                    <p><span className="font-medium text-gray-700">Account Name:</span> {selectedKyc.bankInfo?.accountHolderName}</p>
+                    <p><span className="font-medium text-gray-700">Bank:</span> {selectedKyc.bankInfo?.bankName}</p>
+                    <p><span className="font-medium text-gray-700">A/c No:</span> {selectedKyc.bankInfo?.accountNumber}</p>
+                    <p><span className="font-medium text-gray-700">IFSC:</span> {selectedKyc.bankInfo?.ifscCode}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-3">Uploaded Documents</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {selectedKyc.documents && Object.entries(selectedKyc.documents).map(([key, url]) => {
+                    if (key === 'additionalDocuments' || !url) return null;
+                    return (
+                      <button 
+                        key={key}
+                        onClick={() => setPreviewDoc(url as string)}
+                        className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-blue-50 hover:border-blue-200 transition-colors group"
+                      >
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700 capitalize">
+                          {key.replace(/([A-Z])/g, ' $1').trim()}
+                        </span>
+                        <span className="text-xs text-gray-500 mt-1">Click to view document</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
+              <button 
+                onClick={() => handleVerify(selectedKyc.userId?._id, 'Rejected')}
+                disabled={loading}
+                className="flex items-center gap-2 px-6 py-2.5 bg-white border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 rounded-lg font-medium transition-colors disabled:opacity-50"
+              >
+                <XCircle className="w-5 h-5" /> Reject Profile
+              </button>
+              <button 
+                onClick={() => handleVerify(selectedKyc.userId?._id, 'Verified')}
+                disabled={loading}
+                className="flex items-center gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+              >
+                <CheckCircle className="w-5 h-5" /> Approve Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document Preview Fullscreen Modal */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/90 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-5xl max-h-screen flex flex-col items-center justify-center">
+            <button 
+              onClick={() => setPreviewDoc(null)}
+              className="absolute -top-10 right-0 p-2 text-white hover:text-gray-300 transition-colors"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            {previewDoc.startsWith('data:application/pdf') ? (
+              <iframe src={previewDoc} className="w-full h-[85vh] bg-white rounded-lg shadow-2xl" />
+            ) : (
+              <img src={previewDoc} alt="Document Preview" className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl bg-white" />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

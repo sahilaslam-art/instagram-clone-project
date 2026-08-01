@@ -16,11 +16,10 @@ import { respondTicketSchema } from '../validators/support.validator.js';
 
 const router = express.Router();
 
-// Feature Admin KYC Submission (Does not require feature authorization, just the role)
-router.post('/feature-admin/kyc', authenticate, authorizeRole('Feature_Admin'), validate(submitKycSchema), kycController.submitKyc);
+import * as staffKycController from '../controllers/staff-kyc.controller.js';
 
 // --- Base Admin Routes (Super & Sub Admins Only) ---
-// We explicitly use authorizeRole for endpoints that shouldn't be accessible by ANY Feature_Admin
+// We explicitly use authorizeRole for endpoints that shouldn't be accessible by feature-specific admins
 const adminOnly = [authenticate, authorizeRole('Super_Admin', 'Sub_Admin')];
 
 // Dashboard
@@ -31,35 +30,42 @@ router.get('/dashboard', adminOnly, dashboardController.getAdminDashboard);
 router.post('/sub-admins', authenticate, authorizeRole('Super_Admin'), userController.promoteToSubAdmin);
 router.get('/sub-admins', authenticate, authorizeRole('Super_Admin'), userController.getAllSubAdmins);
 
-// Feature Admin Requests
-router.get('/feature-requests', adminOnly, kycController.getPendingFeatureAdmins);
-router.put('/feature-requests/:requestId/review', adminOnly, kycController.reviewFeatureAdmin);
+// Admin KYC Submission (All Admins)
+router.post('/kyc/submit', authenticate, validate(submitKycSchema), kycController.submitKyc);
+
+// Staff Verification (Super_Admin, Zonal_Admin, Admin, Sub_Admin)
+const staffKycAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin')];
+router.get('/staff-verification/pending', staffKycAuth, staffKycController.getPendingStaffKyc);
+router.put('/staff-verification/:kycId/review', staffKycAuth, validate(updateKycStatusSchema), staffKycController.reviewStaffKyc);
 
 // --- Feature Admin Routes (Role-based access) ---
 
-// KYC Admin Features
-const kycAdminAuth = [authenticate, authorizeFeature('KYC Admin')];
-router.get('/customers', kycAdminAuth, userController.getAllCustomers);
-router.get('/owners', kycAdminAuth, userController.getAllOwners);
-router.put('/users/:userId/status', kycAdminAuth, userController.updateUserStatus);
-router.get('/profile-updates', kycAdminAuth, userController.getPendingProfileUpdates);
-router.put('/profile-updates/:id/review', kycAdminAuth, userController.reviewProfileUpdate);
-router.get('/kyc/pending', kycAdminAuth, kycController.getAllPendingKyc);
-router.put('/kyc/:kycId/verify', kycAdminAuth, validate(updateKycStatusSchema), kycController.reviewKyc);
+// KYC / Profile Admin Features
+const customerKycAuth = [authenticate, authorizeFeature('KYC Admin', 'Customer verification and profile update admin')];
+const ownerKycAuth = [authenticate, authorizeFeature('KYC Admin', 'Owner verification and profile update admin')];
+const bothKycAuth = [authenticate, authorizeFeature('KYC Admin', 'Customer verification and profile update admin', 'Owner verification and profile update admin')];
+
+router.get('/customers', customerKycAuth, userController.getAllCustomers);
+router.get('/owners', ownerKycAuth, userController.getAllOwners);
+router.put('/users/:userId/status', bothKycAuth, userController.updateUserStatus);
+router.get('/profile-updates', bothKycAuth, userController.getPendingProfileUpdates);
+router.put('/profile-updates/:id/review', bothKycAuth, userController.reviewProfileUpdate);
+router.get('/kyc/pending', bothKycAuth, kycController.getAllPendingKyc);
+router.put('/kyc/:kycId/verify', bothKycAuth, validate(updateKycStatusSchema), kycController.reviewKyc);
 
 // Project Admin Features
-const projectAdminAuth = [authenticate, authorizeFeature('Project Admin')];
+const projectAdminAuth = [authenticate, authorizeFeature('Project Admin', 'Project verification and projects update admin')];
 router.get('/projects/pending', projectAdminAuth, projectController.getPendingProjects);
 router.get('/projects/active', projectAdminAuth, projectController.getActiveProjects);
 router.put('/projects/:projectId/review', projectAdminAuth, validate(reviewProjectSchema), projectController.reviewProject);
 
 // Finance Admin Features
-const financeAdminAuth = [authenticate, authorizeFeature('Finance Admin')];
+const financeAdminAuth = [authenticate, authorizeFeature('Finance Admin', 'Owner / Customer withdrawal manage admin')];
 router.get('/withdrawals/pending', financeAdminAuth, walletController.getPendingWithdrawals);
 router.put('/withdrawals/:transactionId/process', financeAdminAuth, walletController.processWithdrawal);
 
 // Support Admin Features
-const supportAdminAuth = [authenticate, authorizeFeature('Support Admin')];
+const supportAdminAuth = [authenticate, authorizeFeature('Support Admin', 'Support admin')];
 router.get('/support', supportAdminAuth, supportController.getAllTickets);
 router.put('/support/:ticketId', supportAdminAuth, validate(respondTicketSchema), supportController.respondToTicket);
 

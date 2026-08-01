@@ -28,28 +28,7 @@ export default function LoginPage() {
       // All admin-level roles go to admin dashboard
       if (['SUPER_ADMIN', 'SUB_ADMIN', 'ADMIN', 'ZONAL_ADMIN', 'WORKER'].includes(role)) {
         navigate('/admin/dashboard');
-      } else if (role === 'FEATURE_ADMIN') {
-        if (user.kycStatus === 'Verified') {
-          // Redirect to specific feature page
-          switch (user.featureRole) {
-            case 'KYC Admin':
-              navigate('/admin/customers');
-              break;
-            case 'Finance Admin':
-              navigate('/admin/withdrawals');
-              break;
-            case 'Support Admin':
-              navigate('/admin/support');
-              break;
-            case 'Project Admin':
-              navigate('/admin/validations');
-              break;
-            default:
-              navigate('/admin/feature-onboarding');
-          }
-        } else {
-          navigate('/admin/feature-onboarding');
-        }
+
       } else if (role === 'OWNER') {
         navigate('/owner/projects');
       } else {

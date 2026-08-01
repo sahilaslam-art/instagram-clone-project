@@ -45,9 +45,11 @@ export default function RegisterPage() {
 
     try {
       await api.post('/auth/register', formData);
-      setRegisteredEmail(formData.email);
-      setRegisteredMobile(formData.mobileNumber);
-      setStep('otp');
+      // Bypass OTP for testing
+      // setRegisteredEmail(formData.email);
+      // setRegisteredMobile(formData.mobileNumber);
+      // setStep('otp');
+      navigate('/login', { state: { message: 'Registration successful! (OTP bypassed for testing). Please login.' } });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to register');
     } finally {

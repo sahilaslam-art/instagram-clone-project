@@ -59,9 +59,11 @@ export default function Layout() {
   let adminLinks = [];
   const uRole = currentUser.role.toUpperCase();
 
-  if (uRole === 'SUPER_ADMIN' || uRole === 'SUB_ADMIN') {
+  if (uRole === 'SUPER_ADMIN') {
     adminLinks = [
       { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/admin/sub-admins', icon: Users, label: 'Sub-Admins' },
+      { to: '/admin/staff-verification', icon: Users, label: 'Staff Verification' },
       { to: '/admin/customers', icon: Users, label: 'Customer Verification' },
       { to: '/admin/owners', icon: Users, label: 'Owner Verification' },
       { to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' },
@@ -70,36 +72,37 @@ export default function Layout() {
       { to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' },
       { to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' },
     ];
-    if (uRole === 'SUPER_ADMIN') {
-      // Add Sub-Admin management
-      adminLinks.splice(1, 0, { to: '/admin/sub-admins', icon: Users, label: 'Sub-Admins' });
-    }
-    // Add Feature Admin applications
-    adminLinks.splice(2, 0, { to: '/admin/feature-requests', icon: CheckSquare, label: 'Feature Admin Requests' });
-  } else if (['ZONAL_ADMIN', 'ADMIN', 'WORKER'].includes(uRole)) {
-    // New hierarchy roles — show dashboard and pending approvals
-    adminLinks = [
-      { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    ];
-  } else if (uRole === 'FEATURE_ADMIN') {
-    adminLinks = [
-      { to: '/admin/feature-onboarding', icon: User, label: 'My Application' }
-    ];
+  } else if (['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(uRole)) {
     if (currentUser.kycStatus === 'Verified') {
+      adminLinks.push({ to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' });
+      
+      if (['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN'].includes(uRole)) {
+        adminLinks.push({ to: '/admin/staff-verification', icon: Users, label: 'Staff Verification' });
+      }
+      
       // Add specific links based on feature role
       const fRole = currentUser.featureRole;
-      if (fRole === 'KYC Admin') {
+      if (fRole === 'Customer verification and profile update admin') {
         adminLinks.push({ to: '/admin/customers', icon: Users, label: 'Customer Verification' });
+        adminLinks.push({ to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' });
+      } else if (fRole === 'Owner verification and profile update admin') {
         adminLinks.push({ to: '/admin/owners', icon: Users, label: 'Owner Verification' });
-      } else if (fRole === 'Finance Admin') {
-        adminLinks.push({ to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' });
-      } else if (fRole === 'Support Admin') {
-        adminLinks.push({ to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' });
-      } else if (fRole === 'Project Admin') {
+        adminLinks.push({ to: '/admin/profile-updates', icon: CheckSquare, label: 'Profile Updates' });
+      } else if (fRole === 'Project verification and projects update admin') {
         adminLinks.push({ to: '/admin/validations', icon: CheckSquare, label: 'Project Validation' });
         adminLinks.push({ to: '/admin/tracking', icon: List, label: 'Live Projects Tracking' });
+      } else if (fRole === 'Owner / Customer withdrawal manage admin') {
+        adminLinks.push({ to: '/admin/withdrawals', icon: HandCoins, label: 'Withdrawals' });
+      } else if (fRole === 'Support admin') {
+        adminLinks.push({ to: '/admin/support', icon: HelpCircle, label: 'Support Tickets' });
       }
     }
+  }
+
+
+  // Add "My Profile" to all admin roles as the last item (if it's an admin role)
+  if (['SUPER_ADMIN', 'ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(uRole)) {
+    adminLinks.push({ to: '/admin/profile', icon: User, label: 'My Profile' });
   }
 
   const links = currentUser.role.toUpperCase() === 'CUSTOMER' ? customerLinks 

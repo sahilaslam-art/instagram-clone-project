@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 const kycVerificationSchema = new mongoose.Schema({
     // User Information
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    userRole: { type: String, enum: ['Customer', 'Owner', 'Feature_Admin'], required: true },
-    appliedFeatureRole: { type: String, default: null }, // Only for Feature_Admin
+    userRole: { type: String, enum: ['Customer', 'Owner', 'Worker', 'Sub_Admin', 'Admin', 'Zonal_Admin', 'Super_Admin'], required: true },
 
     // Personal Information (Matches DB Design)
     fullName: { type: String, required: true },
@@ -39,12 +38,7 @@ const kycVerificationSchema = new mongoose.Schema({
 
     // Review Information
     reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }, // User who did initial review (Super_Admin or Sub_Admin)
-    rejectionReason: { type: String, default: null },
-    
-    // Sub-Admin specific fields for Feature_Admin verification
-    subAdminDecision: { type: String, enum: ['Pending', 'Verified', 'Rejected'], default: null },
-    subAdminReviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-    subAdminReviewedDate: { type: Date, default: null },
+    rejectionReason: { type: String, default: null }
 }, {
     timestamps: true
 });

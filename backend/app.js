@@ -14,7 +14,7 @@ const app = express();
 
 app.use(cors());
 app.use(helmet());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Custom NoSQL injection sanitizer (express-mongo-sanitize is incompatible with Express v5
 // because req.query is a read-only getter in Express v5)

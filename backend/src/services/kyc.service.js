@@ -26,9 +26,7 @@ export const submitKyc = async (userId, userRole, kycData) => {
             rejectionReason: null
         };
         
-        if (userRole === 'Feature_Admin') {
-            updateData.subAdminDecision = 'Pending';
-        }
+
         kycRecord = await kycRepository.updateById(existingKyc._id, updateData);
     } else {
         // Create new KYC
@@ -44,9 +42,7 @@ export const submitKyc = async (userId, userRole, kycData) => {
             verificationStatus: 'Pending'
         };
         
-        if (userRole === 'Feature_Admin') {
-            payload.subAdminDecision = 'Pending';
-        }
+
 
         kycRecord = await kycRepository.create(payload);
     }
@@ -109,58 +105,3 @@ export const reviewKyc = async (kycId, adminId, status, rejectionReason) => {
     return updatedKyc;
 };
 
-export const getPendingFeatureAdmins = async (role) => {
-    if (role === 'Sub_Admin') {
-        return await kycRepository.findAllFeatureAdminsPendingSubAdmin();
-    } else if (role === 'Super_Admin') {
-        return await kycRepository.findAllFeatureAdminsForSuperAdmin();
-    }
-    throw new Error('Unauthorized');
-};
-
-export const reviewFeatureAdmin = async (kycId, adminId, adminRole, status, rejectionReason) => {
-    const kyc = await kycRepository.findById(kycId);
-    if (!kyc) {
-        throw new Error('KYC Record not found');
-    }
-
-    if (kyc.userRole !== 'Feature_Admin') {
-        throw new Error('This record is not a Feature Admin request');
-    }
-
-    const updatePayload = {};
-    const userUpdatePayload = {};
-
-    if (adminRole === 'Sub_Admin') {
-        updatePayload.subAdminDecision = status;
-        updatePayload.subAdminReviewedBy = adminId;
-        updatePayload.subAdminReviewedDate = new Date();
-    } else if (adminRole === 'Super_Admin') {
-        updatePayload.verificationStatus = status;
-        updatePayload.reviewedBy = adminId;
-        updatePayload.reviewedDate = new Date();
-        
-        userUpdatePayload.kycStatus = status;
-        
-        if (status === 'Verified') {
-            userUpdatePayload.featureRole = kyc.appliedFeatureRole;
-            userUpdatePayload.dateOfBirth = kyc.dateOfBirth;
-            userUpdatePayload.gender = kyc.gender;
-            userUpdatePayload.address = kyc.address;
-            userUpdatePayload.bankInfo = kyc.bankInfo;
-            userUpdatePayload.isProfileComplete = true;
-        } else if (status === 'Rejected') {
-            updatePayload.rejectionReason = rejectionReason;
-        }
-    } else {
-        throw new Error('Unauthorized');
-    }
-
-    const updatedKyc = await kycRepository.updateById(kycId, updatePayload);
-    
-    if (Object.keys(userUpdatePayload).length > 0) {
-        await userRepository.updateById(updatedKyc.userId, userUpdatePayload);
-    }
-
-    return updatedKyc;
-};
