@@ -71,18 +71,34 @@ export const getAllSubAdmins = async () => {
 export const getAuthorizedStaffUserIds = async (currentUser, targetRole) => {
     if (currentUser.role === 'Super_Admin') return null; // No filtering needed
 
-    if (currentUser.role === 'Zonal_Admin' && targetRole === 'Admin') {
+    if (currentUser.role === 'Zonal_Admin') {
         const adminProfile = await ZonalAdminProfile.findOne({ userId: currentUser._id });
         if (!adminProfile) return [];
-        const matches = await AdminProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone }).select('userId');
-        return matches.map(m => m.userId.toString());
+        if (targetRole === 'Admin') {
+            const matches = await AdminProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone }).select('userId');
+            return matches.map(m => m.userId.toString());
+        }
+        if (targetRole === 'Sub_Admin') {
+            const matches = await SubAdminProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone }).select('userId');
+            return matches.map(m => m.userId.toString());
+        }
+        if (targetRole === 'Worker') {
+            const matches = await WorkerProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone }).select('userId');
+            return matches.map(m => m.userId.toString());
+        }
     }
 
-    if (currentUser.role === 'Admin' && targetRole === 'Sub_Admin') {
+    if (currentUser.role === 'Admin') {
         const adminProfile = await AdminProfile.findOne({ userId: currentUser._id });
         if (!adminProfile) return [];
-        const matches = await SubAdminProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone, region: adminProfile.region }).select('userId');
-        return matches.map(m => m.userId.toString());
+        if (targetRole === 'Sub_Admin') {
+            const matches = await SubAdminProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone, region: adminProfile.region }).select('userId');
+            return matches.map(m => m.userId.toString());
+        }
+        if (targetRole === 'Worker') {
+            const matches = await WorkerProfile.find({ domain: adminProfile.domain, zone: adminProfile.zone, region: adminProfile.region }).select('userId');
+            return matches.map(m => m.userId.toString());
+        }
     }
 
     if (currentUser.role === 'Sub_Admin' && targetRole === 'Worker') {

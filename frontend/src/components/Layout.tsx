@@ -127,8 +127,11 @@ export default function Layout() {
       
       if (uRole === 'ZONAL_ADMIN') {
         adminLinks.push({ to: '/admin/staff/admin', icon: Users, label: 'Admins' });
+        adminLinks.push({ to: '/admin/staff/sub_admin', icon: Users, label: 'Sub-Admins' });
+        adminLinks.push({ to: '/admin/staff/worker', icon: Users, label: 'Workers' });
       } else if (uRole === 'ADMIN') {
         adminLinks.push({ to: '/admin/staff/sub_admin', icon: Users, label: 'Sub-Admins' });
+        adminLinks.push({ to: '/admin/staff/worker', icon: Users, label: 'Workers' });
       } else if (uRole === 'SUB_ADMIN') {
         adminLinks.push({ to: '/admin/staff/worker', icon: Users, label: 'Workers' });
       }

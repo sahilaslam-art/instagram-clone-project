@@ -66,16 +66,18 @@ export const getAdminDashboard = async (currentUser) => {
         totalUsers = await userRepository.countAll();
         staffVerification = await kycRepository.countPendingByRoles(['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker']);
     } else {
-        // Determine the target subordinate role
-        let targetStaffRole = null;
-        if (currentUser.role === 'Zonal_Admin') targetStaffRole = 'Admin';
-        if (currentUser.role === 'Admin') targetStaffRole = 'Sub_Admin';
-        if (currentUser.role === 'Sub_Admin') targetStaffRole = 'Worker';
+        // Determine the target subordinate roles
+        let targetStaffRoles = [];
+        if (currentUser.role === 'Zonal_Admin') targetStaffRoles = ['Admin', 'Sub_Admin', 'Worker'];
+        if (currentUser.role === 'Admin') targetStaffRoles = ['Sub_Admin', 'Worker'];
+        if (currentUser.role === 'Sub_Admin') targetStaffRoles = ['Worker'];
 
         let authorizedStaffIds = [];
-        if (targetStaffRole) {
-            const ids = await userService.getAuthorizedStaffUserIds(currentUser, targetStaffRole);
-            if (ids) authorizedStaffIds = ids;
+        for (const role of targetStaffRoles) {
+            const ids = await userService.getAuthorizedStaffUserIds(currentUser, role);
+            if (ids) {
+                authorizedStaffIds.push(...ids);
+            }
         }
 
         totalUsers += authorizedStaffIds.length + 1; // +1 for the currentUser themselves
