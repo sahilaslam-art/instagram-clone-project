@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      const storedToken = localStorage.getItem('token');
+      const storedToken = sessionStorage.getItem('token');
       if (storedToken) {
         try {
           // Call API to get fresh token and latest user details
@@ -30,12 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           setToken(newToken);
           setCurrentUser(freshUser);
-          localStorage.setItem('token', newToken);
-          localStorage.setItem('user', JSON.stringify(freshUser));
+          sessionStorage.setItem('token', newToken);
+          sessionStorage.setItem('user', JSON.stringify(freshUser));
         } catch (e) {
           console.error('Failed to refresh session', e);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
           setToken(null);
           setCurrentUser(null);
         }
@@ -49,22 +49,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (userData: User, newToken: string) => {
     setCurrentUser(userData);
     setToken(newToken);
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('token', newToken);
+    sessionStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
     setCurrentUser(null);
     setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
   };
 
   const updateUser = (updatedDetails: Partial<User>) => {
     if (!currentUser) return;
     const updated = { ...currentUser, ...updatedDetails };
     setCurrentUser(updated);
-    localStorage.setItem('user', JSON.stringify(updated));
+    sessionStorage.setItem('user', JSON.stringify(updated));
   };
 
   return (
