@@ -18,12 +18,13 @@ const router = express.Router();
 
 import * as staffKycController from '../controllers/staff-kyc.controller.js';
 
-// --- Base Admin Routes (Super & Sub Admins Only) ---
+// --- Base Admin Routes ---
 // We explicitly use authorizeRole for endpoints that shouldn't be accessible by feature-specific admins
-const adminOnly = [authenticate, authorizeRole('Super_Admin', 'Sub_Admin')];
+const superAdminOnly = [authenticate, authorizeRole('Super_Admin', 'Sub_Admin')];
+const allAdminsAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker')];
 
 // Dashboard
-router.get('/dashboard', adminOnly, dashboardController.getAdminDashboard);
+router.get('/dashboard', allAdminsAuth, dashboardController.getAdminDashboard);
 
 // Restricted Accounts (All Admins)
 const restrictedAccountsAuth = [authenticate, authorizeRole('Super_Admin', 'Zonal_Admin', 'Admin', 'Sub_Admin')];
