@@ -212,13 +212,41 @@ export default function AdminStaffDetails() {
 
         {/* Documents and Activities */}
         <div className="lg:col-span-2 space-y-6">
+          
+          {kyc && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">KYC Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1">Personal Info</h4>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="text-gray-500">DOB:</span> {new Date(kyc.dateOfBirth).toLocaleDateString()}</p>
+                    <p><span className="text-gray-500">Gender:</span> {kyc.gender}</p>
+                    <p><span className="text-gray-500">Address:</span> {kyc.address}</p>
+                  </div>
+                </div>
+                {kyc.bankInfo && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2 border-b pb-1">Bank Information</h4>
+                    <div className="space-y-2 text-sm">
+                      <p><span className="text-gray-500">Bank:</span> {kyc.bankInfo.bankName}</p>
+                      <p><span className="text-gray-500">A/C Name:</span> {kyc.bankInfo.accountHolderName}</p>
+                      <p><span className="text-gray-500">A/C No:</span> {kyc.bankInfo.accountNumber}</p>
+                      <p><span className="text-gray-500">IFSC:</span> {kyc.bankInfo.ifscCode}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">KYC Documents</h3>
             {kyc ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {renderDocument('ID Proof', kyc.documents?.idProof)}
-                {renderDocument('Address Proof', kyc.documents?.addressProof)}
-                {renderDocument('Bank Details', kyc.documents?.bankDetails)}
+                {renderDocument('ID Proof', kyc.documents?.identityProof ? { url: kyc.documents.identityProof, fileType: 'image/jpeg' } : undefined)}
+                {renderDocument('Address Proof', kyc.documents?.addressProof ? { url: kyc.documents.addressProof, fileType: 'image/jpeg' } : undefined)}
+                {renderDocument('Bank Proof', kyc.documents?.bankProof ? { url: kyc.documents.bankProof, fileType: 'image/jpeg' } : undefined)}
               </div>
             ) : (
               <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
