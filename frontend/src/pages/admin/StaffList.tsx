@@ -29,8 +29,9 @@ export default function AdminStaffList() {
     }
   };
 
-  if (currentUser?.role.toUpperCase() !== 'SUPER_ADMIN') {
-    return <div className="p-10 text-center text-red-500">Access Denied. Super Admin only.</div>;
+  const allowedRoles = ['SUPER_ADMIN', 'ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN'];
+  if (!allowedRoles.includes(currentUser?.role.toUpperCase() || '')) {
+    return <div className="p-10 text-center text-red-500">Access Denied. Admins only.</div>;
   }
 
   const roleTitle = role?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') + 's';
