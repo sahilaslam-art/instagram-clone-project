@@ -23,7 +23,7 @@ export const getOwnerDashboard = async (req, res, next) => {
 
 export const getAdminDashboard = async (req, res, next) => {
     try {
-        const data = await dashboardService.getAdminDashboard();
+        const data = await dashboardService.getAdminDashboard(req.user);
         return sendResponse(res, 200, true, 'Admin Dashboard Retrieved', data);
     } catch (error) {
         next(error);

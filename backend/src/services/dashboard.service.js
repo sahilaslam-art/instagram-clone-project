@@ -53,12 +53,44 @@ export const getOwnerDashboard = async (userId) => {
     };
 };
 
-export const getAdminDashboard = async () => {
-    const totalUsers = await userRepository.countAll();
+import * as userService from './user.service.js';
+
+export const getAdminDashboard = async (currentUser) => {
     const totalCustomers = await userRepository.countByRole('Customer');
     const totalOwners = await userRepository.countByRole('Owner');
     
-    const staffVerification = await kycRepository.countPendingByRoles(['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker']);
+    let totalUsers = totalCustomers + totalOwners;
+    let staffVerification = 0;
+
+    if (currentUser.role === 'Super_Admin') {
+        totalUsers = await userRepository.countAll();
+        staffVerification = await kycRepository.countPendingByRoles(['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker']);
+    } else {
+        // Determine the target subordinate role
+        let targetStaffRole = null;
+        if (currentUser.role === 'Zonal_Admin') targetStaffRole = 'Admin';
+        if (currentUser.role === 'Admin') targetStaffRole = 'Sub_Admin';
+        if (currentUser.role === 'Sub_Admin') targetStaffRole = 'Worker';
+
+        let authorizedStaffIds = [];
+        if (targetStaffRole) {
+            const ids = await userService.getAuthorizedStaffUserIds(currentUser, targetStaffRole);
+            if (ids) authorizedStaffIds = ids;
+        }
+
+        totalUsers += authorizedStaffIds.length + 1; // +1 for the currentUser themselves
+
+        if (authorizedStaffIds.length > 0) {
+            // Count pending KYC only for authorized staff IDs
+            const mongoose = (await import('mongoose')).default;
+            const KycModel = mongoose.model('KYCVerification');
+            staffVerification = await KycModel.countDocuments({
+                verificationStatus: 'Pending',
+                userId: { $in: authorizedStaffIds }
+            });
+        }
+    }
+    
     const customerOwnerVerification = await kycRepository.countPendingByRoles(['Customer', 'Owner']);
     const profileUpdates = await profileUpdateRepository.countPending();
     const projectsVerification = await projectRepository.countPending();

@@ -68,7 +68,7 @@ export const getAllSubAdmins = async () => {
     return await userRepository.findAllByRole('Sub_Admin');
 };
 
-const getAuthorizedStaffUserIds = async (currentUser, targetRole) => {
+export const getAuthorizedStaffUserIds = async (currentUser, targetRole) => {
     if (currentUser.role === 'Super_Admin') return null; // No filtering needed
 
     if (currentUser.role === 'Zonal_Admin' && targetRole === 'Admin') {
