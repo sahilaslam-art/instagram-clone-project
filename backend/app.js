@@ -41,6 +41,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// Health check route
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'Active', message: 'Server is up and running!' });
+});
+
 // Role-based Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/customer', customerRoutes);
