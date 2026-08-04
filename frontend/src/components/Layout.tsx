@@ -5,13 +5,14 @@ import { Loader2 } from 'lucide-react';
 import api from '../services/api';
 import { 
   LogOut, LayoutDashboard, Briefcase, ShoppingCart, TrendingUp, 
-  Wallet, User, HelpCircle, CheckSquare, List, Users, HandCoins, ShieldAlert
+  Wallet, User, HelpCircle, CheckSquare, List, Users, HandCoins, ShieldAlert, Bell
 } from 'lucide-react';
 
 export default function Layout() {
   const { currentUser, logout, isLoading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !currentUser) {
@@ -22,9 +23,14 @@ export default function Layout() {
   }, [currentUser, isLoading, navigate]);
 
   useEffect(() => {
+    let interval: any;
     if (currentUser && ['SUPER_ADMIN', 'ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(currentUser.role.toUpperCase())) {
       fetchDashboardStats();
+      interval = setInterval(fetchDashboardStats, 30000); // Polling every 30 seconds
     }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [currentUser]);
 
   const fetchDashboardStats = async () => {
@@ -68,13 +74,27 @@ export default function Layout() {
     const val = getBadgeValue(badgeKey);
     if (val > 0) {
       return (
-        <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+        <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse shadow-md border border-red-600">
           {val}
         </span>
       );
     }
     return null;
   };
+
+  const getTotalNotifications = () => {
+    if (!stats) return 0;
+    const { pendingApprovals, openSupportTickets } = stats;
+    let total = openSupportTickets || 0;
+    if (pendingApprovals) {
+      Object.values(pendingApprovals).forEach((val: any) => {
+        if (typeof val === 'number') total += val;
+      });
+    }
+    return total;
+  };
+
+  const totalNotifs = getTotalNotifications();
 
   const customerLinks = [
     { to: '/customer/projects', icon: Briefcase, label: 'Browse Projects' },
@@ -202,6 +222,75 @@ export default function Layout() {
         <header className="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
           <h2 className="text-lg font-medium text-gray-800">Welcome, {currentUser.fullName || 'User'}</h2>
           <div className="flex items-center gap-4">
+            
+            {/* Notification Bell Dropdown for Admins */}
+            {['SUPER_ADMIN', 'ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(currentUser.role.toUpperCase()) && (
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 text-gray-500 hover:text-gray-900 transition-colors focus:outline-none"
+                >
+                  <Bell className="w-6 h-6" />
+                  {totalNotifs > 0 && (
+                    <span className="absolute top-1 right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white"></span>
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden transform transition-all">
+                    <div className="p-4 bg-gray-50 border-b border-gray-100 font-semibold text-gray-800 flex justify-between items-center">
+                      <span>Notifications</span>
+                      <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full font-bold">{totalNotifs} New</span>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {totalNotifs === 0 ? (
+                        <div className="p-8 text-center text-gray-500">
+                          <CheckSquare className="w-8 h-8 mx-auto text-green-400 mb-2" />
+                          <p>You're all caught up!</p>
+                        </div>
+                      ) : (
+                        <ul className="divide-y divide-gray-50">
+                          {stats?.pendingApprovals?.staff > 0 && (
+                            <li className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => { navigate('/admin/staff/worker'); setShowNotifications(false); }}>
+                              <div className="text-sm text-gray-600"><span className="font-bold text-gray-900">{stats.pendingApprovals.staff}</span> Staff Verifications Pending</div>
+                            </li>
+                          )}
+                          {stats?.pendingApprovals?.customersAndOwners > 0 && (
+                            <li className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => { navigate('/admin/customers'); setShowNotifications(false); }}>
+                              <div className="text-sm text-gray-600"><span className="font-bold text-gray-900">{stats.pendingApprovals.customersAndOwners}</span> Customer/Owner Verifications Pending</div>
+                            </li>
+                          )}
+                          {stats?.pendingApprovals?.profileUpdates > 0 && (
+                            <li className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => { navigate('/admin/profile-updates'); setShowNotifications(false); }}>
+                              <div className="text-sm text-gray-600"><span className="font-bold text-gray-900">{stats.pendingApprovals.profileUpdates}</span> Profile Updates Pending</div>
+                            </li>
+                          )}
+                          {stats?.pendingApprovals?.projects > 0 && (
+                            <li className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => { navigate('/admin/validations'); setShowNotifications(false); }}>
+                              <div className="text-sm text-gray-600"><span className="font-bold text-gray-900">{stats.pendingApprovals.projects}</span> Project Validations Pending</div>
+                            </li>
+                          )}
+                          {stats?.pendingApprovals?.withdrawals > 0 && (
+                            <li className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => { navigate('/admin/withdrawals'); setShowNotifications(false); }}>
+                              <div className="text-sm text-gray-600"><span className="font-bold text-gray-900">{stats.pendingApprovals.withdrawals}</span> Withdrawals Pending</div>
+                            </li>
+                          )}
+                          {stats?.openSupportTickets > 0 && (
+                            <li className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => { navigate('/admin/support'); setShowNotifications(false); }}>
+                              <div className="text-sm text-gray-600"><span className="font-bold text-gray-900">{stats.openSupportTickets}</span> Support Tickets Open</div>
+                            </li>
+                          )}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {['CUSTOMER', 'OWNER'].includes(currentUser.role.toUpperCase()) && (
               <div className={`${themeBgText} px-4 py-2 rounded-full font-medium text-sm`}>
                 Balance: ${(currentUser.walletBalance || 0).toLocaleString()}
