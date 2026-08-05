@@ -20,6 +20,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Detect duplicated tabs and redirect them to login page
+    const channel = new BroadcastChannel('stagefund_tab_manager');
+    
+    // Announce this tab's initialization
+    channel.postMessage({ type: 'TAB_INIT' });
+
+    channel.onmessage = (event) => {
+      if (event.data.type === 'TAB_INIT') {
+        // An existing tab receives this. Tell the new tab we are already here.
+        channel.postMessage({ type: 'TAB_EXISTS' });
+      } else if (event.data.type === 'TAB_EXISTS') {
+        // We are a new/duplicated tab and an existing tab is already running.
+        // If we have a token (meaning we were duplicated), clear it and force login.
+        if (sessionStorage.getItem('token')) {
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
+          window.location.href = '/';
+        }
+      }
+    };
+
     const initAuth = async () => {
       const storedToken = sessionStorage.getItem('token');
       if (storedToken) {
@@ -44,6 +65,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initAuth();
+
+    return () => {
+      channel.close();
+    };
   }, []);
 
   const login = (userData: User, newToken: string) => {
