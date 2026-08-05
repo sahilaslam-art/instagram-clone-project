@@ -8,6 +8,8 @@ import jwt from 'jsonwebtoken';
 
 export const registerUser = async (userData) => {
     const { fullName, email, mobileNumber, password, role, featureRole, domain, zone, region, category, speciality } = userData;
+    const cleanEmail = email ? email.trim().toLowerCase() : email;
+    const cleanMobile = mobileNumber ? mobileNumber.trim() : mobileNumber;
 
     // Validate role
     if (!['Customer', 'Owner', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker'].includes(role)) {
@@ -15,13 +17,13 @@ export const registerUser = async (userData) => {
     }
 
     // Check if email or mobile exists
-    const existingUser = await userRepository.findByEmailOrMobile(email, mobileNumber);
+    const existingUser = await userRepository.findByEmailOrMobile(cleanEmail, cleanMobile);
 
     if (existingUser) {
-        if (existingUser.email === email) {
+        if (existingUser.email === cleanEmail) {
             throw new Error('Email Already Exists');
         }
-        if (existingUser.mobileNumber === mobileNumber) {
+        if (existingUser.mobileNumber === cleanMobile) {
             throw new Error('Mobile Number Already Exists');
         }
     }
@@ -32,8 +34,8 @@ export const registerUser = async (userData) => {
     // Create base user
     const newUser = await userRepository.create({
         fullName,
-        email,
-        mobileNumber,
+        email: cleanEmail,
+        mobileNumber: cleanMobile,
         password: hashedPassword,
         role
     });
@@ -65,7 +67,9 @@ export const registerUser = async (userData) => {
 
 export const loginUser = async (identifier, password) => {
     // Identifier can be email or mobile number
-    const user = await userRepository.findByEmailOrMobile(identifier, identifier);
+    const cleanIdentifier = identifier ? identifier.trim().toLowerCase() : identifier;
+    const cleanPassword = password ? password.trim() : password;
+    const user = await userRepository.findByEmailOrMobile(cleanIdentifier, cleanIdentifier);
 
     if (!user) {
         throw new Error('Invalid Credentials');
@@ -76,7 +80,7 @@ export const loginUser = async (identifier, password) => {
     }
 
     // Verify password
-    const isPasswordValid = await argon2.verify(user.password, password);
+    const isPasswordValid = await argon2.verify(user.password, cleanPassword);
     if (!isPasswordValid) {
         throw new Error('Invalid Credentials');
     }

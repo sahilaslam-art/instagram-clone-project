@@ -17,7 +17,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/login', { identifier, password });
+      const cleanIdentifier = identifier.trim().toLowerCase();
+      const cleanPassword = password.trim();
+      const response = await api.post('/auth/login', { identifier: cleanIdentifier, password: cleanPassword });
       // The API response is wrapped in { success, message, data }
       const { token, user } = response.data.data;
       
