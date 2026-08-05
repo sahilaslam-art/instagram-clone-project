@@ -96,6 +96,14 @@ export default function Layout() {
 
   const totalNotifs = getTotalNotifications();
 
+  const getStaffNotificationRoute = () => {
+    const role = currentUser?.role.toUpperCase();
+    if (role === 'SUPER_ADMIN') return '/admin/staff/zonal_admin';
+    if (role === 'ZONAL_ADMIN') return '/admin/staff/admin';
+    if (role === 'ADMIN') return '/admin/staff/sub_admin';
+    return '/admin/staff/worker';
+  };
+
   const customerLinks = [
     { to: '/customer/projects', icon: Briefcase, label: 'Browse Projects' },
     { to: '/customer/cart', icon: ShoppingCart, label: 'My Cart' },
@@ -254,7 +262,7 @@ export default function Layout() {
                       ) : (
                         <ul className="divide-y divide-gray-50">
                           {stats?.pendingApprovals?.staff > 0 && (
-                            <li className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => { navigate('/admin/staff/worker'); setShowNotifications(false); }}>
+                            <li className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => { navigate(getStaffNotificationRoute()); setShowNotifications(false); }}>
                               <div className="text-sm text-gray-600"><span className="font-bold text-gray-900">{stats.pendingApprovals.staff}</span> Staff Verifications Pending</div>
                             </li>
                           )}
