@@ -28,8 +28,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     channel.onmessage = (event) => {
       if (event.data.type === 'TAB_INIT') {
-        // An existing tab receives this. Tell the new tab we are already here.
-        channel.postMessage({ type: 'TAB_EXISTS' });
+        // Only claim we exist if we are ACTUALLY logged in!
+        // This prevents the login page (which has no token) from logging out other tabs.
+        if (sessionStorage.getItem('token')) {
+          channel.postMessage({ type: 'TAB_EXISTS' });
+        }
       } else if (event.data.type === 'TAB_EXISTS') {
         // We are a new/duplicated tab and an existing tab is already running.
         // If we have a token (meaning we were duplicated), clear it and force login.
