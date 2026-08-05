@@ -9,13 +9,25 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to attach token
+// Request interceptor to attach token and disable cache
 api.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem('token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Disable caching for GET requests to prevent cross-tab stale profile data
+    if (config.method === 'get') {
+      config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+      config.headers['Pragma'] = 'no-cache';
+      config.headers['Expires'] = '0';
+      config.params = {
+        ...config.params,
+        _t: new Date().getTime(),
+      };
+    }
+    
     return config;
   },
   (error) => Promise.reject(error)
