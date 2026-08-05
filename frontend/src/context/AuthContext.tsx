@@ -20,34 +20,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Detect duplicated tabs and redirect them to login page
-    const channel = new BroadcastChannel('stagefund_tab_manager');
-    const myTabId = Date.now().toString() + Math.random().toString();
-    
-    // Announce this tab's initialization
-    channel.postMessage({ type: 'TAB_INIT', senderId: myTabId });
-
-    channel.onmessage = (event) => {
-      if (event.data.type === 'TAB_INIT') {
-        // Only claim we exist if we are ACTUALLY logged in!
-        // This prevents the login page (which has no token) from logging out other tabs.
-        if (sessionStorage.getItem('token')) {
-          channel.postMessage({ type: 'TAB_EXISTS', targetId: event.data.senderId });
-        }
-      } else if (event.data.type === 'TAB_EXISTS' && event.data.targetId === myTabId) {
-        // We are a new/duplicated tab and an existing tab is already running.
-        // If we have a token (meaning we were duplicated), clear it and force login.
-        if (sessionStorage.getItem('token')) {
-          sessionStorage.removeItem('token');
-          sessionStorage.removeItem('user');
-          window.location.href = '/';
-        }
-      }
-    };
-
     const initAuth = async () => {
       const storedToken = sessionStorage.getItem('token');
       if (storedToken) {
+        // Detect duplicated tabs: when a tab is duplicated, sessionStorage is copied
+        // but the navigation type is 'navigate' (not 'reload').
+        // On a normal refresh, the type is 'reload' — so the session stays valid.
+        const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+        const navType = navEntries.length > 0 ? navEntries[0].type : 'navigate';
+
+        if (navType !== 'reload' && navType !== 'back_forward') {
+          // This is a duplicated tab — clear copied session and show login
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
+          setIsLoading(false);
+          return;
+        }
+
         try {
           // Call API to get fresh token and latest user details
           const res = await api.get('/auth/refresh');
@@ -69,10 +58,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initAuth();
-
-    return () => {
-      channel.close();
-    };
   }, []);
 
   const login = (userData: User, newToken: string) => {
