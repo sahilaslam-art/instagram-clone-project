@@ -22,18 +22,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Detect duplicated tabs and redirect them to login page
     const channel = new BroadcastChannel('stagefund_tab_manager');
+    const myTabId = Date.now().toString() + Math.random().toString();
     
     // Announce this tab's initialization
-    channel.postMessage({ type: 'TAB_INIT' });
+    channel.postMessage({ type: 'TAB_INIT', senderId: myTabId });
 
     channel.onmessage = (event) => {
       if (event.data.type === 'TAB_INIT') {
         // Only claim we exist if we are ACTUALLY logged in!
         // This prevents the login page (which has no token) from logging out other tabs.
         if (sessionStorage.getItem('token')) {
-          channel.postMessage({ type: 'TAB_EXISTS' });
+          channel.postMessage({ type: 'TAB_EXISTS', targetId: event.data.senderId });
         }
-      } else if (event.data.type === 'TAB_EXISTS') {
+      } else if (event.data.type === 'TAB_EXISTS' && event.data.targetId === myTabId) {
         // We are a new/duplicated tab and an existing tab is already running.
         // If we have a token (meaning we were duplicated), clear it and force login.
         if (sessionStorage.getItem('token')) {
