@@ -29,8 +29,11 @@ export default function LoginPage() {
       const role = user.role.toUpperCase();
       // All admin-level roles go to admin dashboard
       if (['SUPER_ADMIN', 'SUB_ADMIN', 'ADMIN', 'ZONAL_ADMIN', 'WORKER'].includes(role)) {
-        navigate('/admin/dashboard');
-
+        if (role !== 'SUPER_ADMIN' && user.kycStatus !== 'Verified') {
+          navigate('/admin/profile');
+        } else {
+          navigate('/admin/dashboard');
+        }
       } else if (role === 'OWNER') {
         navigate('/owner/projects');
       } else {

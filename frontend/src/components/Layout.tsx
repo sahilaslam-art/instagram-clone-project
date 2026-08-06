@@ -19,6 +19,10 @@ export default function Layout() {
       navigate('/');
     } else if (currentUser && (currentUser.accountStatus === 'Suspended' || currentUser.accountStatus === 'Hold')) {
       navigate('/restricted-access');
+    } else if (currentUser && ['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(currentUser.role.toUpperCase()) && currentUser.kycStatus !== 'Verified') {
+      if (window.location.pathname !== '/admin/profile') {
+        navigate('/admin/profile');
+      }
     }
   }, [currentUser, isLoading, navigate]);
 
