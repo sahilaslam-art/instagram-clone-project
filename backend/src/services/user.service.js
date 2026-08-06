@@ -225,6 +225,11 @@ export const updateUserStatus = async (userId, accountStatus, kycStatus, current
         }
     }
 
+    const targetKycStatus = kycStatus || user.kycStatus;
+    if (accountStatus && accountStatus !== user.accountStatus && targetKycStatus !== 'Verified') {
+        throw new Error('Cannot update account status for unverified profiles. Please verify KYC first.');
+    }
+
     const updateData = {};
     if (accountStatus) updateData.accountStatus = accountStatus;
     if (kycStatus) updateData.kycStatus = kycStatus;
