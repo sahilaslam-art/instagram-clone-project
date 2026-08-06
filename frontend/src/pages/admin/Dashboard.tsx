@@ -12,13 +12,18 @@ export default function AdminDashboard() {
     fetchDashboard();
   }, []);
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const fetchDashboard = async () => {
     try {
       setLoading(true);
+      setErrorMsg(null);
       const res = await api.get('/admin/dashboard');
       setStats(res.data.data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load admin dashboard', err);
+      const msg = err.response?.data?.message || err.message || 'Unknown error';
+      setErrorMsg(`API Error: ${msg} (Status: ${err.response?.status})`);
     } finally {
       setLoading(false);
     }
@@ -114,7 +119,10 @@ export default function AdminDashboard() {
           </div>
         </div>
       ) : (
-        <div className="py-10 text-center text-red-500">Failed to load dashboard data.</div>
+        <div className="py-10 text-center text-red-500">
+          <p className="font-bold">Failed to load dashboard data.</p>
+          <p className="text-sm mt-2">{errorMsg}</p>
+        </div>
       )}
     </div>
   );
