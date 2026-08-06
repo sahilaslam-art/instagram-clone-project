@@ -160,15 +160,17 @@ export default function AdminStaffDetails() {
                     {/* Action Button - Only if KYC is Verified */}
                     {user.kycStatus === 'Verified' && (
                       <button 
-                        onClick={() => handleStatusUpdate(user.accountStatus === 'Active' ? 'Suspended' : 'Active')}
+                        onClick={() => {
+                          if (user.accountStatus === 'Active') handleStatusUpdate('Suspended');
+                        }}
                         className={`text-xs font-medium rounded-md px-3 py-1.5 shadow-sm transition-colors ${
                           user.accountStatus === 'Active' 
                             ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' 
-                            : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                            : 'bg-gray-100 text-gray-500 border border-gray-200 cursor-not-allowed'
                         }`}
-                        disabled={loading}
+                        disabled={loading || user.accountStatus === 'Suspended'}
                       >
-                        {user.accountStatus === 'Active' ? 'Suspend Account' : 'Mark Active'}
+                        {user.accountStatus === 'Active' ? 'Suspend Account' : 'Account Suspended'}
                       </button>
                     )}
                   </div>

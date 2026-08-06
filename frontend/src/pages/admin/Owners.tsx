@@ -164,15 +164,17 @@ export default function AdminOwners() {
                       
                       {owner.kycStatus === 'Verified' ? (
                         <button 
-                          onClick={() => handleStatusUpdate(owner._id, owner.accountStatus === 'Active' ? 'Suspended' : 'Active', owner.kycStatus)}
+                          onClick={() => {
+                            if (owner.accountStatus === 'Active') handleStatusUpdate(owner._id, 'Suspended', owner.kycStatus);
+                          }}
                           className={`text-xs font-medium rounded-md px-3 py-1.5 shadow-sm transition-colors ${
                             owner.accountStatus === 'Active' 
                               ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' 
-                              : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                              : 'bg-gray-100 text-gray-500 border border-gray-200 cursor-not-allowed'
                           }`}
-                          disabled={loading}
+                          disabled={loading || owner.accountStatus === 'Suspended'}
                         >
-                          {owner.accountStatus === 'Active' ? 'Suspend Account' : 'Mark Active'}
+                          {owner.accountStatus === 'Active' ? 'Suspend Account' : 'Account Suspended'}
                         </button>
                       ) : (
                         <span className="text-xs text-gray-400 italic bg-gray-50 px-2 py-1 rounded">Verify to manage</span>
