@@ -48,29 +48,21 @@ export default function RestrictedAccounts() {
   }
 
   const suspendedAccounts = accounts.filter(a => a.accountStatus === 'Suspended');
-  const holdAccounts = accounts.filter(a => a.accountStatus === 'Hold');
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Restricted Accounts</h1>
-        <p className="text-gray-500">Manage suspended and on-hold user accounts.</p>
+        <p className="text-gray-500">Manage suspended user accounts.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <div className="bg-red-50 border border-red-200 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
             <Ban className="w-6 h-6 text-red-600" />
             <h2 className="text-lg font-semibold text-red-900">Suspended ({suspendedAccounts.length})</h2>
           </div>
           <p className="text-sm text-red-700">These accounts must re-submit their KYC documents to be reviewed.</p>
-        </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <AlertCircle className="w-6 h-6 text-amber-600" />
-            <h2 className="text-lg font-semibold text-amber-900">On Hold ({holdAccounts.length})</h2>
-          </div>
-          <p className="text-sm text-amber-700">These accounts are temporarily paused and cannot access the platform.</p>
         </div>
       </div>
 
@@ -105,10 +97,7 @@ export default function RestrictedAccounts() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                        acc.accountStatus === 'Suspended' ? 'bg-red-50 text-red-700 border border-red-200' :
-                        'bg-amber-50 text-amber-700 border border-amber-200'
-                      }`}>
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
                         {acc.accountStatus}
                       </span>
                     </td>

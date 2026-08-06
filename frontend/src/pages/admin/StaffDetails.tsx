@@ -52,7 +52,7 @@ export default function AdminStaffDetails() {
     }
   };
 
-  const handleStatusUpdate = async (newStatus: 'Active' | 'Suspended' | 'Hold') => {
+  const handleStatusUpdate = async (newStatus: 'Active' | 'Suspended') => {
     if (!window.confirm(`Are you sure you want to change this account's status to ${newStatus}?`)) return;
     try {
       setLoading(true);
@@ -157,17 +157,19 @@ export default function AdminStaffDetails() {
                       {user.accountStatus || 'Active'}
                     </span>
                     
-                    {/* Action Dropdown - Only if KYC is Verified */}
+                    {/* Action Button - Only if KYC is Verified */}
                     {user.kycStatus === 'Verified' && (
-                      <select 
-                        className="text-xs border border-gray-300 rounded-md px-2 py-1 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
-                        value={user.accountStatus || 'Active'}
-                        onChange={(e) => handleStatusUpdate(e.target.value as any)}
+                      <button 
+                        onClick={() => handleStatusUpdate(user.accountStatus === 'Active' ? 'Suspended' : 'Active')}
+                        className={`text-xs font-medium rounded-md px-3 py-1.5 shadow-sm transition-colors ${
+                          user.accountStatus === 'Active' 
+                            ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' 
+                            : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                        }`}
+                        disabled={loading}
                       >
-                        <option value="Active">Mark Active</option>
-                        <option value="Hold">Put On Hold</option>
-                        <option value="Suspended">Suspend</option>
-                      </select>
+                        {user.accountStatus === 'Active' ? 'Suspend Account' : 'Mark Active'}
+                      </button>
                     )}
                   </div>
                   {user.kycStatus !== 'Verified' && (

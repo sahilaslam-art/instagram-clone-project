@@ -120,7 +120,7 @@ export default function AdminOwners() {
                 if (tab === 'PENDING') return owner.kycStatus === 'Pending';
                 if (tab === 'DENIED') return owner.kycStatus === 'Rejected';
                 if (tab === 'VERIFIED') return owner.kycStatus === 'Verified' && owner.accountStatus === 'Active';
-                if (tab === 'SUSPENDED') return owner.accountStatus === 'Suspended' || owner.accountStatus === 'Hold';
+                if (tab === 'SUSPENDED') return owner.accountStatus === 'Suspended';
                 return true;
               });
 
@@ -140,7 +140,6 @@ export default function AdminOwners() {
                   <td className="px-6 py-4">
                     <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
                       owner.accountStatus === 'Suspended' ? 'bg-red-100 text-red-700' :
-                      owner.accountStatus === 'Hold' ? 'bg-amber-100 text-amber-700' :
                       owner.kycStatus === 'Verified' ? 'bg-green-100 text-green-700' :
                       owner.kycStatus === 'Rejected' ? 'bg-red-100 text-red-700' :
                       'bg-amber-100 text-amber-700'
@@ -164,16 +163,17 @@ export default function AdminOwners() {
                       )}
                       
                       {owner.kycStatus === 'Verified' ? (
-                        <select 
-                          className="text-xs border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
-                          value={owner.accountStatus || 'Active'}
-                          onChange={(e) => handleStatusUpdate(owner._id, e.target.value, owner.kycStatus)}
+                        <button 
+                          onClick={() => handleStatusUpdate(owner._id, owner.accountStatus === 'Active' ? 'Suspended' : 'Active', owner.kycStatus)}
+                          className={`text-xs font-medium rounded-md px-3 py-1.5 shadow-sm transition-colors ${
+                            owner.accountStatus === 'Active' 
+                              ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' 
+                              : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                          }`}
                           disabled={loading}
                         >
-                          <option value="Active">Mark Active</option>
-                          <option value="Hold">Put On Hold</option>
-                          <option value="Suspended">Suspend</option>
-                        </select>
+                          {owner.accountStatus === 'Active' ? 'Suspend Account' : 'Mark Active'}
+                        </button>
                       ) : (
                         <span className="text-xs text-gray-400 italic bg-gray-50 px-2 py-1 rounded">Verify to manage</span>
                       )}

@@ -120,7 +120,7 @@ export default function AdminCustomers() {
                 if (tab === 'PENDING') return customer.kycStatus === 'Pending';
                 if (tab === 'DENIED') return customer.kycStatus === 'Rejected';
                 if (tab === 'VERIFIED') return customer.kycStatus === 'Verified' && customer.accountStatus === 'Active';
-                if (tab === 'SUSPENDED') return customer.accountStatus === 'Suspended' || customer.accountStatus === 'Hold';
+                if (tab === 'SUSPENDED') return customer.accountStatus === 'Suspended';
                 return true;
               });
 
@@ -140,7 +140,6 @@ export default function AdminCustomers() {
                   <td className="px-6 py-4">
                     <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
                       customer.accountStatus === 'Suspended' ? 'bg-red-100 text-red-700' :
-                      customer.accountStatus === 'Hold' ? 'bg-amber-100 text-amber-700' :
                       customer.kycStatus === 'Verified' ? 'bg-green-100 text-green-700' :
                       customer.kycStatus === 'Rejected' ? 'bg-red-100 text-red-700' :
                       'bg-amber-100 text-amber-700'
@@ -164,16 +163,17 @@ export default function AdminCustomers() {
                       )}
                       
                       {customer.kycStatus === 'Verified' ? (
-                        <select 
-                          className="text-xs border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
-                          value={customer.accountStatus || 'Active'}
-                          onChange={(e) => handleStatusUpdate(customer._id, e.target.value, customer.kycStatus)}
+                        <button 
+                          onClick={() => handleStatusUpdate(customer._id, customer.accountStatus === 'Active' ? 'Suspended' : 'Active', customer.kycStatus)}
+                          className={`text-xs font-medium rounded-md px-3 py-1.5 shadow-sm transition-colors ${
+                            customer.accountStatus === 'Active' 
+                              ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' 
+                              : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                          }`}
                           disabled={loading}
                         >
-                          <option value="Active">Mark Active</option>
-                          <option value="Hold">Put On Hold</option>
-                          <option value="Suspended">Suspend</option>
-                        </select>
+                          {customer.accountStatus === 'Active' ? 'Suspend Account' : 'Mark Active'}
+                        </button>
                       ) : (
                         <span className="text-xs text-gray-400 italic bg-gray-50 px-2 py-1 rounded">Verify to manage</span>
                       )}

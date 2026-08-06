@@ -240,7 +240,7 @@ export const updateUserStatus = async (userId, accountStatus, kycStatus, current
 };
 
 export const getRestrictedAccounts = async (currentUser) => {
-    const restricted = await userRepository.findByAccountStatusIn(['Suspended', 'Hold']);
+    const restricted = await userRepository.findByAccountStatusIn(['Suspended']);
     
     if (currentUser.role === 'Super_Admin') {
         return restricted;
