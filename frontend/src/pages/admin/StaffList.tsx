@@ -11,8 +11,19 @@ export default function AdminStaffList() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
+  const [filterDomain, setFilterDomain] = useState('');
+  const [filterZone, setFilterZone] = useState('');
+  const [filterRegion, setFilterRegion] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterSpeciality, setFilterSpeciality] = useState('');
+
   useEffect(() => {
     if (role) {
+      setFilterDomain('');
+      setFilterZone('');
+      setFilterRegion('');
+      setFilterCategory('');
+      setFilterSpeciality('');
       fetchStaff(role);
     }
   }, [role]);
@@ -36,12 +47,97 @@ export default function AdminStaffList() {
 
   const roleTitle = role?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') + 's';
 
+  const uniqueDomains = Array.from(new Set(staff.map(s => s.domain).filter(Boolean)));
+  const uniqueZones = Array.from(new Set(staff.map(s => s.zone).filter(Boolean)));
+  const uniqueRegions = Array.from(new Set(staff.map(s => s.region).filter(Boolean)));
+  const uniqueCategories = Array.from(new Set(staff.map(s => s.category).filter(Boolean)));
+  const uniqueSpecialities = Array.from(new Set(staff.map(s => s.speciality).filter(Boolean)));
+
+  const filteredStaff = staff.filter(user => {
+    if (filterDomain && user.domain !== filterDomain) return false;
+    if (filterZone && user.zone !== filterZone) return false;
+    if (filterRegion && user.region !== filterRegion) return false;
+    if (filterCategory && user.category !== filterCategory) return false;
+    if (filterSpeciality && user.speciality !== filterSpeciality) return false;
+    return true;
+  });
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{roleTitle} Management</h1>
         <p className="text-gray-500">View registered {roleTitle} in the system.</p>
       </div>
+
+      {(uniqueDomains.length > 0 || uniqueZones.length > 0 || uniqueRegions.length > 0) && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-4">
+          {uniqueDomains.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Domain</label>
+              <select 
+                value={filterDomain} 
+                onChange={e => setFilterDomain(e.target.value)}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="">All Domains</option>
+                {uniqueDomains.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+          )}
+          {uniqueZones.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Zone</label>
+              <select 
+                value={filterZone} 
+                onChange={e => setFilterZone(e.target.value)}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="">All Zones</option>
+                {uniqueZones.map(z => <option key={z} value={z}>{z}</option>)}
+              </select>
+            </div>
+          )}
+          {uniqueRegions.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Region</label>
+              <select 
+                value={filterRegion} 
+                onChange={e => setFilterRegion(e.target.value)}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="">All Regions</option>
+                {uniqueRegions.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+          )}
+          {uniqueCategories.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Category</label>
+              <select 
+                value={filterCategory} 
+                onChange={e => setFilterCategory(e.target.value)}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="">All Categories</option>
+                {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          )}
+          {uniqueSpecialities.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Speciality</label>
+              <select 
+                value={filterSpeciality} 
+                onChange={e => setFilterSpeciality(e.target.value)}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="">All Specialities</option>
+                {uniqueSpecialities.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="p-4 bg-gray-50 border-b border-gray-200 font-medium text-gray-700 flex items-center gap-2">
@@ -65,18 +161,18 @@ export default function AdminStaffList() {
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-500">Loading...</td>
                 </tr>
-              ) : staff.length === 0 ? (
+              ) : filteredStaff.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No {roleTitle} found.</td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No {roleTitle} found matching filters.</td>
                 </tr>
               ) : (
-                staff.map(user => (
+                filteredStaff.map(user => (
                   <tr key={user._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-900">{user.fullName}</td>
                     <td className="px-6 py-4 text-gray-500">{user.email}</td>
                     <td className="px-6 py-4 text-gray-500">{user.mobileNumber}</td>
                     <td className="px-6 py-4 text-gray-500">
-                      {[user.domain, user.zone, user.region].filter(Boolean).join(' > ') || 'None'}
+                      {[user.domain, user.zone, user.region, user.category, user.speciality].filter(Boolean).join(' > ') || 'None'}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
