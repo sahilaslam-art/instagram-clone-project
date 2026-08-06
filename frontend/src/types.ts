@@ -27,12 +27,17 @@ export interface ProjectUpdate {
 
 export interface User {
   id: string;
-  role: Role;
+  role: Role | 'SUPER_ADMIN' | 'ZONAL_ADMIN' | 'ADMIN' | 'SUB_ADMIN' | 'WORKER';
   fullName: string;
   email: string;
   mobileNumber: string;
   kycStatus: 'Pending' | 'Verified' | 'Rejected' | 'Not Submitted';
   walletBalance: number;
+  domain?: string;
+  zone?: string;
+  region?: string;
+  category?: string;
+  speciality?: string;
 }
 
 export interface Investment {

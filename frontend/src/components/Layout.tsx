@@ -192,7 +192,17 @@ export default function Layout() {
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-6 border-b border-gray-200">
           <h1 className={`text-2xl font-bold tracking-tight ${themeText}`}>StageFund</h1>
-          <p className="text-sm text-gray-500 mt-1 capitalize">{currentUser.role.toLowerCase()} Portal</p>
+          <p className="text-sm text-gray-500 mt-1 capitalize">{currentUser.role.toLowerCase().replace('_', ' ')} Portal</p>
+          
+          {['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN', 'WORKER'].includes(currentUser.role.toUpperCase()) && (
+            <div className="mt-3 flex flex-wrap gap-1.5 text-[10px] text-gray-500 font-medium tracking-wide">
+              {currentUser.domain && <span className="bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded shadow-sm">D: {currentUser.domain}</span>}
+              {currentUser.zone && <span className="bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded shadow-sm">Z: {currentUser.zone}</span>}
+              {currentUser.region && <span className="bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded shadow-sm">R: {currentUser.region}</span>}
+              {currentUser.category && <span className="bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded shadow-sm">C: {currentUser.category}</span>}
+              {currentUser.speciality && <span className="bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded shadow-sm">S: {currentUser.speciality}</span>}
+            </div>
+          )}
         </div>
         
         <nav className="flex-1 overflow-y-auto py-4">
