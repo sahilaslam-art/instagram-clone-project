@@ -163,16 +163,20 @@ export default function AdminCustomers() {
                         </button>
                       )}
                       
-                      <select 
-                        className="text-xs border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
-                        value={customer.accountStatus || 'Active'}
-                        onChange={(e) => handleStatusUpdate(customer._id, e.target.value, customer.kycStatus)}
-                        disabled={loading}
-                      >
-                        <option value="Active">Mark Active</option>
-                        <option value="Hold">Put On Hold</option>
-                        <option value="Suspended">Suspend</option>
-                      </select>
+                      {customer.kycStatus === 'Verified' ? (
+                        <select 
+                          className="text-xs border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
+                          value={customer.accountStatus || 'Active'}
+                          onChange={(e) => handleStatusUpdate(customer._id, e.target.value, customer.kycStatus)}
+                          disabled={loading}
+                        >
+                          <option value="Active">Mark Active</option>
+                          <option value="Hold">Put On Hold</option>
+                          <option value="Suspended">Suspend</option>
+                        </select>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic bg-gray-50 px-2 py-1 rounded">Verify to manage</span>
+                      )}
                     </div>
                   </td>
                 </tr>
