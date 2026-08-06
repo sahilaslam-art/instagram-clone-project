@@ -147,25 +147,34 @@ export default function AdminStaffDetails() {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium mb-1">Account Status</p>
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    user.accountStatus === 'Active' ? 'bg-green-100 text-green-800' : 
-                    user.accountStatus === 'Suspended' ? 'bg-red-100 text-red-800' : 
-                    'bg-amber-100 text-amber-800'
-                  }`}>
-                    {user.accountStatus || 'Active'}
-                  </span>
-                  
-                  {/* Action Dropdown for Super Admin */}
-                  <select 
-                    className="text-xs border border-gray-300 rounded-md px-2 py-1 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
-                    value={user.accountStatus || 'Active'}
-                    onChange={(e) => handleStatusUpdate(e.target.value as any)}
-                  >
-                    <option value="Active">Mark Active</option>
-                    <option value="Hold">Put On Hold</option>
-                    <option value="Suspended">Suspend</option>
-                  </select>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      user.accountStatus === 'Active' ? 'bg-green-100 text-green-800' : 
+                      user.accountStatus === 'Suspended' ? 'bg-red-100 text-red-800' : 
+                      'bg-amber-100 text-amber-800'
+                    }`}>
+                      {user.accountStatus || 'Active'}
+                    </span>
+                    
+                    {/* Action Dropdown - Only if KYC is Verified */}
+                    {user.kycStatus === 'Verified' && (
+                      <select 
+                        className="text-xs border border-gray-300 rounded-md px-2 py-1 bg-white shadow-sm focus:outline-none focus:border-indigo-500"
+                        value={user.accountStatus || 'Active'}
+                        onChange={(e) => handleStatusUpdate(e.target.value as any)}
+                      >
+                        <option value="Active">Mark Active</option>
+                        <option value="Hold">Put On Hold</option>
+                        <option value="Suspended">Suspend</option>
+                      </select>
+                    )}
+                  </div>
+                  {user.kycStatus !== 'Verified' && (
+                    <p className="text-xs text-amber-600 italic">
+                      * Account status can only be modified after KYC is Verified.
+                    </p>
+                  )}
                 </div>
               </div>
               
