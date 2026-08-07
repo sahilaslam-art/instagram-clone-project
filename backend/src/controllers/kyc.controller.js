@@ -40,6 +40,21 @@ export const getAllPendingKyc = async (req, res, next) => {
     }
 };
 
+export const getKycByUserId = async (req, res, next) => {
+    try {
+        const userId = req.params.userId;
+        const kyc = await kycService.getKycStatus(userId);
+        
+        if (!kyc) {
+            return sendResponse(res, 404, false, 'KYC Record Not Found');
+        }
+        
+        return sendResponse(res, 200, true, 'KYC Status Retrieved Successfully', kyc);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const reviewKyc = async (req, res, next) => {
     try {
         const adminId = req.user._id;

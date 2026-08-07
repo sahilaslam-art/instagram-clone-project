@@ -60,6 +60,7 @@ router.put('/users/:userId/status', bothKycAuth, userController.updateUserStatus
 router.get('/profile-updates', bothKycAuth, userController.getPendingProfileUpdates);
 router.put('/profile-updates/:id/review', bothKycAuth, userController.reviewProfileUpdate);
 router.get('/kyc/pending', bothKycAuth, kycController.getAllPendingKyc);
+router.get('/kyc/user/:userId', bothKycAuth, kycController.getKycByUserId);
 router.put('/kyc/:kycId/verify', bothKycAuth, validate(updateKycStatusSchema), kycController.reviewKyc);
 
 // Project Admin Features

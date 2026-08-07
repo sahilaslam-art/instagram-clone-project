@@ -190,7 +190,11 @@ export default function AdminStaffList() {
                 </tr>
               ) : (
                 filteredStaff.map(user => (
-                  <tr key={user._id} className="hover:bg-gray-50 transition-colors">
+                  <tr 
+                    key={user._id} 
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => navigate(`/admin/staff/${user._id}`)}
+                  >
                     <td className="px-6 py-4 font-medium text-gray-900">{user.fullName}</td>
                     <td className="px-6 py-4 text-gray-500">{user.email}</td>
                     <td className="px-6 py-4 text-gray-500">{user.mobileNumber}</td>
@@ -208,7 +212,10 @@ export default function AdminStaffList() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button 
-                        onClick={() => navigate(`/admin/staff-details/${user._id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/admin/staff-details/${user._id}`);
+                        }}
                         className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors"
                       >
                         <Eye className="w-4 h-4" />

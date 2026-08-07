@@ -71,6 +71,18 @@ export default function AdminOwners() {
     }
   };
 
+  const handleRowClick = async (ownerId: string) => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/admin/kyc/user/${ownerId}`);
+      setSelectedKyc(res.data.data);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'KYC data not found for this user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -159,7 +171,11 @@ export default function AdminOwners() {
               }
 
               return filteredOwners.map(owner => (
-                <tr key={owner._id} className="hover:bg-gray-50">
+                <tr 
+                  key={owner._id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleRowClick(owner._id)}
+                >
                   <td className="px-6 py-4 font-medium text-gray-900">{owner.fullName}</td>
                   <td className="px-6 py-4 text-gray-500">{owner.email}</td>
                   <td className="px-6 py-4 text-gray-500">{owner.mobileNumber}</td>
@@ -177,10 +193,9 @@ export default function AdminOwners() {
                     <div className="flex justify-end gap-2 items-center">
                       {tab === 'PENDING' && (
                         <button 
-                          onClick={() => {
-                            const kyc = pendingKycs.find(k => k.userId?._id === owner._id);
-                            if (kyc) setSelectedKyc(kyc);
-                            else alert('KYC data not found for this user');
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRowClick(owner._id);
                           }}
                           className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
                         >
@@ -190,7 +205,8 @@ export default function AdminOwners() {
                       
                       {owner.kycStatus === 'Verified' ? (
                         <button 
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (owner.accountStatus === 'Active') handleStatusUpdate(owner._id, 'Suspended', owner.kycStatus);
                           }}
                           className={`text-xs font-medium rounded-md px-3 py-1.5 shadow-sm transition-colors ${
