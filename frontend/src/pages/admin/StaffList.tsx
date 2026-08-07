@@ -193,7 +193,7 @@ export default function AdminStaffList() {
                   <tr 
                     key={user._id} 
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => navigate(`/admin/staff/${user._id}`)}
+                    onClick={() => navigate(`/admin/staff-details/${user._id}`)}
                   >
                     <td className="px-6 py-4 font-medium text-gray-900">{user.fullName}</td>
                     <td className="px-6 py-4 text-gray-500">{user.email}</td>
