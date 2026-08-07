@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, X } from 'lucide-react';
+import { CheckCircle, XCircle, X, Search } from 'lucide-react';
 import api from '../../services/api';
 
 export default function AdminCustomers() {
@@ -9,6 +9,7 @@ export default function AdminCustomers() {
   const [tab, setTab] = useState<'REGISTERED' | 'PENDING' | 'DENIED' | 'VERIFIED' | 'SUSPENDED'>('REGISTERED');
   const [selectedKyc, setSelectedKyc] = useState<any | null>(null);
   const [previewDoc, setPreviewDoc] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
 
   useEffect(() => {
@@ -77,24 +78,36 @@ export default function AdminCustomers() {
         <p className="text-gray-500">Review and approve new customer registrations.</p>
       </div>
 
-      <div className="flex gap-4 border-b border-gray-200 overflow-x-auto">
-        {[
-          { id: 'REGISTERED', label: 'Registered' },
-          { id: 'PENDING', label: 'Pending Verification' },
-          { id: 'DENIED', label: 'Denied Verification' },
-          { id: 'VERIFIED', label: 'Verified Verification' },
-          { id: 'SUSPENDED', label: 'Suspended Verification' }
-        ].map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id as any)}
-            className={`pb-3 px-1 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-              tab === t.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 pb-2">
+        <div className="flex gap-4 overflow-x-auto w-full sm:w-auto">
+          {[
+            { id: 'REGISTERED', label: 'Registered' },
+            { id: 'PENDING', label: 'Pending Verification' },
+            { id: 'DENIED', label: 'Denied Verification' },
+            { id: 'VERIFIED', label: 'Verified Verification' },
+            { id: 'SUSPENDED', label: 'Suspended Verification' }
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id as any)}
+              className={`pb-3 px-1 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+                tab === t.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="relative w-full sm:w-80">
+          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input 
+            type="text" 
+            placeholder="Search by name / phone no. / email..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
+          />
+        </div>
       </div>
 
 
@@ -116,11 +129,24 @@ export default function AdminCustomers() {
               </tr>
             ) : (() => {
               const filteredCustomers = customers.filter(customer => {
-                if (tab === 'REGISTERED') return customer.kycStatus === 'Incomplete';
-                if (tab === 'PENDING') return customer.kycStatus === 'Pending';
-                if (tab === 'DENIED') return customer.kycStatus === 'Rejected';
-                if (tab === 'VERIFIED') return customer.kycStatus === 'Verified' && customer.accountStatus === 'Active';
-                if (tab === 'SUSPENDED') return customer.accountStatus === 'Suspended';
+                let matchTab = false;
+                if (tab === 'REGISTERED') matchTab = customer.kycStatus === 'Incomplete';
+                else if (tab === 'PENDING') matchTab = customer.kycStatus === 'Pending';
+                else if (tab === 'DENIED') matchTab = customer.kycStatus === 'Rejected';
+                else if (tab === 'VERIFIED') matchTab = customer.kycStatus === 'Verified' && customer.accountStatus === 'Active';
+                else if (tab === 'SUSPENDED') matchTab = customer.accountStatus === 'Suspended';
+                else matchTab = true;
+
+                if (!matchTab) return false;
+
+                if (searchQuery) {
+                  const q = searchQuery.toLowerCase();
+                  if (!customer.fullName?.toLowerCase().includes(q) && 
+                      !customer.email?.toLowerCase().includes(q) && 
+                      !customer.mobileNumber?.toLowerCase().includes(q)) {
+                    return false;
+                  }
+                }
                 return true;
               });
 

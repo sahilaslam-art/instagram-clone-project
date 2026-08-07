@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Shield, Eye } from 'lucide-react';
+import { Shield, Eye, Search } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -16,6 +16,7 @@ export default function AdminStaffList() {
   const [filterRegion, setFilterRegion] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterSpeciality, setFilterSpeciality] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (role) {
@@ -24,6 +25,7 @@ export default function AdminStaffList() {
       setFilterRegion('');
       setFilterCategory('');
       setFilterSpeciality('');
+      setSearchQuery('');
       fetchStaff(role);
     }
   }, [role]);
@@ -59,6 +61,15 @@ export default function AdminStaffList() {
     if (filterRegion && user.region !== filterRegion) return false;
     if (filterCategory && user.category !== filterCategory) return false;
     if (filterSpeciality && user.speciality !== filterSpeciality) return false;
+    
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      if (!user.fullName?.toLowerCase().includes(q) && 
+          !user.email?.toLowerCase().includes(q) && 
+          !user.mobileNumber?.toLowerCase().includes(q)) {
+        return false;
+      }
+    }
     return true;
   });
 
@@ -140,9 +151,21 @@ export default function AdminStaffList() {
       )}
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="p-4 bg-gray-50 border-b border-gray-200 font-medium text-gray-700 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-indigo-600" />
-          Current {roleTitle}
+        <div className="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="font-medium text-gray-700 flex items-center gap-2">
+            <Shield className="w-5 h-5 text-indigo-600" />
+            Current {roleTitle}
+          </div>
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input 
+              type="text" 
+              placeholder="Search by name / phone no. / email..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
+            />
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
