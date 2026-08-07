@@ -186,7 +186,7 @@ export default function AdminOwners() {
                       owner.kycStatus === 'Rejected' ? 'bg-red-100 text-red-700' :
                       'bg-amber-100 text-amber-700'
                     }`}>
-                      {owner.accountStatus === 'Active' ? owner.kycStatus : owner.accountStatus}
+                      {owner.accountStatus === 'Suspended' ? 'Suspended Account' : owner.kycStatus}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">

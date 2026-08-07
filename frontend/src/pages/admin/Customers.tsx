@@ -186,7 +186,7 @@ export default function AdminCustomers() {
                       customer.kycStatus === 'Rejected' ? 'bg-red-100 text-red-700' :
                       'bg-amber-100 text-amber-700'
                     }`}>
-                      {customer.accountStatus === 'Active' ? customer.kycStatus : customer.accountStatus}
+                      {customer.accountStatus === 'Suspended' ? 'Suspended Account' : customer.kycStatus}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">

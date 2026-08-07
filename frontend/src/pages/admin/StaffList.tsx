@@ -202,13 +202,14 @@ export default function AdminStaffList() {
                       {[user.domain, user.zone, user.region, user.category, user.speciality].filter(Boolean).join(' > ') || 'None'}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        user.kycStatus === 'Verified' ? 'bg-green-100 text-green-800' : 
-                        user.kycStatus === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {user.kycStatus || 'Incomplete'}
-                      </span>
+                      <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                      user.accountStatus === 'Suspended' ? 'bg-red-100 text-red-700' :
+                      user.kycStatus === 'Verified' ? 'bg-green-100 text-green-700' :
+                      user.kycStatus === 'Rejected' ? 'bg-red-100 text-red-700' :
+                      'bg-amber-100 text-amber-700'
+                    }`}>
+                      {user.accountStatus === 'Suspended' ? 'Suspended Account' : user.kycStatus}
+                    </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button 
