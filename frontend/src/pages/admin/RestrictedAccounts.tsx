@@ -113,8 +113,8 @@ export default function RestrictedAccounts() {
                     <td className="px-6 py-4 text-right space-x-3">
                       {['Admin', 'Sub_Admin', 'Worker', 'Zonal_Admin'].includes(acc.role) ? (
                         <Link 
-                          to={`/admin/staff/${acc._id}`}
-                          className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                          to={`/admin/staff-details/${acc._id}`}
+                          className="text-indigo-600 hover:text-indigo-900 font-medium text-sm transition-colors"
                         >
                           View Profile
                         </Link>
