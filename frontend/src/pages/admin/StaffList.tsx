@@ -24,6 +24,10 @@ export default function AdminStaffList() {
   const lockRegion = ['Admin', 'Sub_Admin'].includes(currentUser?.role || '');
   const lockCategory = ['Sub_Admin'].includes(currentUser?.role || '');
 
+  const showRegion = ['admin', 'sub_admin', 'worker'].includes(role || '');
+  const showCategory = ['sub_admin', 'worker'].includes(role || '');
+  const showSpeciality = ['worker'].includes(role || '');
+
   useEffect(() => {
     if (role) {
       setFilterDomain(lockDomain ? currentUser?.domain || '' : '');
@@ -129,43 +133,49 @@ export default function AdminStaffList() {
             </select>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500">Region</label>
-            <select 
-              value={filterRegion} 
-              onChange={e => setFilterRegion(e.target.value)}
-              disabled={lockRegion}
-              className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
-            >
-              <option value="">All Regions</option>
-              {[...Array(20)].map((_, i) => <option key={i} value={`R${i+1}`}>R{i+1}</option>)}
-            </select>
-          </div>
+          {showRegion && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Region</label>
+              <select 
+                value={filterRegion} 
+                onChange={e => setFilterRegion(e.target.value)}
+                disabled={lockRegion}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
+              >
+                <option value="">All Regions</option>
+                {[...Array(20)].map((_, i) => <option key={i} value={`R${i+1}`}>R{i+1}</option>)}
+              </select>
+            </div>
+          )}
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500">Category</label>
-            <select 
-              value={filterCategory} 
-              onChange={e => setFilterCategory(e.target.value)}
-              disabled={lockCategory}
-              className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
-            >
-              <option value="">All Categories</option>
-              {[...Array(10)].map((_, i) => <option key={i} value={`C${i+1}`}>C{i+1}</option>)}
-            </select>
-          </div>
+          {showCategory && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Category</label>
+              <select 
+                value={filterCategory} 
+                onChange={e => setFilterCategory(e.target.value)}
+                disabled={lockCategory}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
+              >
+                <option value="">All Categories</option>
+                {[...Array(10)].map((_, i) => <option key={i} value={`C${i+1}`}>C{i+1}</option>)}
+              </select>
+            </div>
+          )}
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500">Speciality</label>
-            <select 
-              value={filterSpeciality} 
-              onChange={e => setFilterSpeciality(e.target.value)}
-              className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-            >
-              <option value="">All Specialities</option>
-              {[...Array(10)].map((_, i) => <option key={i} value={`S${i+1}`}>S{i+1}</option>)}
-            </select>
-          </div>
+          {showSpeciality && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Speciality</label>
+              <select 
+                value={filterSpeciality} 
+                onChange={e => setFilterSpeciality(e.target.value)}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="">All Specialities</option>
+                {[...Array(10)].map((_, i) => <option key={i} value={`S${i+1}`}>S{i+1}</option>)}
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
