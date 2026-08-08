@@ -39,8 +39,16 @@ export const createProfileUpdateRequest = async (req, res, next) => {
 
 export const getAllCustomers = async (req, res, next) => {
     try {
-        const customers = await userService.getAllCustomers();
-        return sendResponse(res, 200, true, 'Customers Retrieved Successfully', customers);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        
+        const queryFilters = {
+            search: req.query.search,
+            accountStatus: req.query.accountStatus
+        };
+
+        const result = await userService.getAllCustomers(page, limit, queryFilters);
+        return sendResponse(res, 200, true, 'Customers Retrieved Successfully', result);
     } catch (error) {
         next(error);
     }
@@ -48,8 +56,16 @@ export const getAllCustomers = async (req, res, next) => {
 
 export const getAllOwners = async (req, res, next) => {
     try {
-        const owners = await userService.getAllOwners();
-        return sendResponse(res, 200, true, 'Owners Retrieved Successfully', owners);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        
+        const queryFilters = {
+            search: req.query.search,
+            accountStatus: req.query.accountStatus
+        };
+
+        const result = await userService.getAllOwners(page, limit, queryFilters);
+        return sendResponse(res, 200, true, 'Owners Retrieved Successfully', result);
     } catch (error) {
         next(error);
     }
@@ -57,8 +73,10 @@ export const getAllOwners = async (req, res, next) => {
 
 export const getAllSubAdmins = async (req, res, next) => {
     try {
-        const subAdmins = await userService.getAllSubAdmins();
-        return sendResponse(res, 200, true, 'Sub-Admins Retrieved Successfully', subAdmins);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const result = await userService.getAllSubAdmins(page, limit);
+        return sendResponse(res, 200, true, 'Sub-Admins Retrieved Successfully', result);
     } catch (error) {
         next(error);
     }
@@ -73,8 +91,21 @@ export const getStaffListByRole = async (req, res, next) => {
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join('_');
             
-        const staff = await userService.getStaffByRole(formattedRole, req.user);
-        return sendResponse(res, 200, true, `${formattedRole} Retrieved Successfully`, staff);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        
+        const queryFilters = {
+            domain: req.query.domain,
+            zone: req.query.zone,
+            region: req.query.region,
+            category: req.query.category,
+            speciality: req.query.speciality,
+            search: req.query.search,
+            accountStatus: req.query.accountStatus
+        };
+
+        const result = await userService.getStaffByRole(formattedRole, req.user, page, limit, queryFilters);
+        return sendResponse(res, 200, true, `${formattedRole} Retrieved Successfully`, result);
     } catch (error) {
         next(error);
     }

@@ -35,6 +35,12 @@ export const findAllByRole = async (role) => {
     return await User.find({ role }).select('-password');
 };
 
+export const findPaginated = async (query, skip = 0, limit = 20) => {
+    const users = await User.find(query).select('-password').sort({ createdAt: -1 }).skip(skip).limit(limit);
+    const total = await User.countDocuments(query);
+    return { users, total };
+};
+
 export const countAll = async () => {
     return await User.countDocuments();
 };

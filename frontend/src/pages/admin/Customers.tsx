@@ -12,19 +12,39 @@ export default function AdminCustomers() {
   const [searchQuery, setSearchQuery] = useState('');
 
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const limit = 20;
+
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page, tab, searchQuery]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+      if (searchQuery) params.append('search', searchQuery);
+
+      if (tab === 'REGISTERED') params.append('accountStatus', 'Incomplete');
+      else if (tab === 'PENDING') params.append('accountStatus', 'Pending');
+      else if (tab === 'DENIED') params.append('accountStatus', 'Rejected');
+      else if (tab === 'VERIFIED') params.append('accountStatus', 'Verified');
+      else if (tab === 'SUSPENDED') params.append('accountStatus', 'Suspended Account');
+
       const [customersRes, kycRes] = await Promise.all([
-        api.get('/admin/customers'),
-        api.get('/admin/kyc/pending')
+        api.get(`/admin/customers?${params.toString()}`),
+        api.get('/admin/kyc/pending') // This is used for pending KYC modal operations
       ]);
-      setCustomers(customersRes.data.data || []);
+      setCustomers(customersRes.data.data.data || []);
       setPendingKycs(kycRes.data.data || []);
+
+      const total = customersRes.data.data.total || 0;
+      setTotalRecords(total);
+      setTotalPages(Math.ceil(total / limit) || 1);
     } catch (err) {
       console.error('Failed to load customers', err);
     } finally {
@@ -87,7 +107,7 @@ export default function AdminCustomers() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Customer Verification</h1>
-        <p className="text-gray-500">Review and approve new customer registrations.</p>
+        <p className="text-gray-500">Review and approve new customer registrations. Total: {totalRecords}</p>
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200 pb-2">
@@ -101,7 +121,7 @@ export default function AdminCustomers() {
           ].map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id as any)}
+              onClick={() => { setTab(t.id as any); setPage(1); }}
               className={`pb-3 px-1 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
                 tab === t.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
@@ -116,7 +136,7 @@ export default function AdminCustomers() {
             type="text" 
             placeholder="Search by name / phone no. / email..." 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
             className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
           />
         </div>
@@ -140,26 +160,7 @@ export default function AdminCustomers() {
                 <td colSpan={5} className="px-6 py-8 text-center text-gray-500">Loading...</td>
               </tr>
             ) : (() => {
-              const filteredCustomers = customers.filter(customer => {
-                let matchTab = false;
-                if (tab === 'REGISTERED') matchTab = customer.kycStatus === 'Incomplete';
-                else if (tab === 'PENDING') matchTab = customer.kycStatus === 'Pending';
-                else if (tab === 'DENIED') matchTab = customer.kycStatus === 'Rejected';
-                else if (tab === 'VERIFIED') matchTab = customer.kycStatus === 'Verified' && customer.accountStatus === 'Active';
-                else if (tab === 'SUSPENDED') matchTab = customer.accountStatus === 'Suspended';
-                
-                if (!matchTab) return false;
-
-                if (searchQuery) {
-                  const q = searchQuery.toLowerCase();
-                  if (!customer.fullName?.toLowerCase().startsWith(q) && 
-                      !customer.email?.toLowerCase().startsWith(q) && 
-                      !customer.mobileNumber?.toLowerCase().startsWith(q)) {
-                    return false;
-                  }
-                }
-                return true;
-              });
+              const filteredCustomers = customers;
 
               if (filteredCustomers.length === 0) {
                 return (
@@ -216,6 +217,31 @@ export default function AdminCustomers() {
           </tbody>
         </table>
       </div>
+      
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="p-4 bg-white border border-gray-200 rounded-xl flex items-center justify-between">
+          <span className="text-sm text-gray-500">
+            Showing page {page} of {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Document Review Modal */}
       {selectedKyc && (

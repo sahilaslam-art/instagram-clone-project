@@ -56,20 +56,59 @@ export const createProfileUpdateRequest = async (userId, updateData) => {
     return { message: 'Profile update request submitted successfully', request: newRequest };
 };
 
-export const getAllCustomers = async () => {
-    return await userRepository.findAllByRole('Customer');
+export const getAllCustomers = async (page = 1, limit = 20, queryFilters = {}) => {
+    const skip = (page - 1) * limit;
+    let query = { role: 'Customer' };
+    
+    if (queryFilters.search) {
+        const q = new RegExp(queryFilters.search, 'i');
+        query.$or = [{ fullName: q }, { email: q }, { mobileNumber: q }];
+    }
+
+    if (queryFilters.accountStatus) {
+        if (queryFilters.accountStatus === 'Suspended Account') {
+            query.accountStatus = 'Suspended';
+        } else {
+            query.kycStatus = queryFilters.accountStatus;
+            query.accountStatus = { $ne: 'Suspended' };
+        }
+    }
+
+    const data = await userRepository.findPaginated(query, skip, limit);
+    return { data: data.users, total: data.total, page, limit };
 };
 
-export const getAllOwners = async () => {
-    return await userRepository.findAllByRole('Owner');
+export const getAllOwners = async (page = 1, limit = 20, queryFilters = {}) => {
+    const skip = (page - 1) * limit;
+    let query = { role: 'Owner' };
+
+    if (queryFilters.search) {
+        const q = new RegExp(queryFilters.search, 'i');
+        query.$or = [{ fullName: q }, { email: q }, { mobileNumber: q }];
+    }
+
+    if (queryFilters.accountStatus) {
+        if (queryFilters.accountStatus === 'Suspended Account') {
+            query.accountStatus = 'Suspended';
+        } else {
+            query.kycStatus = queryFilters.accountStatus;
+            query.accountStatus = { $ne: 'Suspended' };
+        }
+    }
+
+    const data = await userRepository.findPaginated(query, skip, limit);
+    return { data: data.users, total: data.total, page, limit };
 };
 
-export const getAllSubAdmins = async () => {
-    return await userRepository.findAllByRole('Sub_Admin');
+export const getAllSubAdmins = async (page = 1, limit = 20) => {
+    const skip = (page - 1) * limit;
+    const data = await userRepository.findPaginated({ role: 'Sub_Admin' }, skip, limit);
+    return { data: data.users, total: data.total, page, limit };
 };
 
 export const getAuthorizedStaffUserIds = async (currentUser, targetRole) => {
-    if (currentUser.role === 'Super_Admin') return null; // No filtering needed
+    // Keeping this for backward compatibility if used elsewhere (like getRestrictedAccounts)
+    if (currentUser.role === 'Super_Admin') return null; 
 
     if (currentUser.role === 'Zonal_Admin') {
         const adminProfile = await ZonalAdminProfile.findOne({ userId: currentUser._id });
@@ -108,39 +147,87 @@ export const getAuthorizedStaffUserIds = async (currentUser, targetRole) => {
         return matches.map(m => m.userId.toString());
     }
 
-    return []; // For any other combination, no subordinates
+    return []; 
 };
 
-export const getStaffByRole = async (role, currentUser) => {
-    // role is one of: Zonal_Admin, Admin, Sub_Admin, Worker
-    const authorizedUserIds = await getAuthorizedStaffUserIds(currentUser, role);
+export const getStaffByRole = async (role, currentUser, page = 1, limit = 20, queryFilters = {}) => {
+    let profileQuery = {};
     
-    let users = await userRepository.findAllByRole(role);
+    // Geographical filters from request
+    if (queryFilters.domain) profileQuery.domain = queryFilters.domain;
+    if (queryFilters.zone) profileQuery.zone = queryFilters.zone;
+    if (queryFilters.region) profileQuery.region = queryFilters.region;
+    if (queryFilters.category) profileQuery.category = queryFilters.category;
+    if (queryFilters.speciality) profileQuery.speciality = queryFilters.speciality;
 
-    // Apply geographic filter if applicable
-    if (authorizedUserIds !== null) {
-        users = users.filter(u => authorizedUserIds.includes(u._id.toString()));
+    if (currentUser.role !== 'Super_Admin') {
+        if (currentUser.role === 'Zonal_Admin') {
+            const adminProfile = await ZonalAdminProfile.findOne({ userId: currentUser._id });
+            if (!adminProfile) return { data: [], total: 0, page, limit };
+            profileQuery.domain = adminProfile.domain;
+            profileQuery.zone = adminProfile.zone;
+        } else if (currentUser.role === 'Admin') {
+            const adminProfile = await AdminProfile.findOne({ userId: currentUser._id });
+            if (!adminProfile) return { data: [], total: 0, page, limit };
+            profileQuery.domain = adminProfile.domain;
+            profileQuery.zone = adminProfile.zone;
+            profileQuery.region = adminProfile.region;
+        } else if (currentUser.role === 'Sub_Admin') {
+            if (role !== 'Worker') return { data: [], total: 0, page, limit };
+            const adminProfile = await SubAdminProfile.findOne({ userId: currentUser._id });
+            if (!adminProfile) return { data: [], total: 0, page, limit };
+            profileQuery.domain = adminProfile.domain;
+            profileQuery.zone = adminProfile.zone;
+            profileQuery.region = adminProfile.region;
+            profileQuery.category = adminProfile.category;
+        } else {
+             return { data: [], total: 0, page, limit };
+        }
+    }
+
+    const skip = (page - 1) * limit;
+    
+    let ProfileModel;
+    if (role === 'Zonal_Admin') ProfileModel = ZonalAdminProfile;
+    else if (role === 'Admin') ProfileModel = AdminProfile;
+    else if (role === 'Sub_Admin') ProfileModel = SubAdminProfile;
+    else if (role === 'Worker') ProfileModel = WorkerProfile;
+
+    const profiles = await ProfileModel.find(profileQuery)
+        .populate({ path: 'userId', select: '-password' })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+        
+    const total = await ProfileModel.countDocuments(profileQuery);
+
+    let mappedData = profiles.map(p => {
+        const u = p.userId ? p.userId.toObject() : {};
+        u.domain = p.domain;
+        u.zone = p.zone;
+        u.region = p.region;
+        u.category = p.category;
+        u.speciality = p.speciality;
+        return u;
+    }).filter(u => u._id); // Filter out any dangling profiles without user
+
+    if (queryFilters.search) {
+        const q = queryFilters.search.toLowerCase();
+        mappedData = mappedData.filter(u => 
+            u.fullName?.toLowerCase().includes(q) || 
+            u.email?.toLowerCase().includes(q) || 
+            u.mobileNumber?.toLowerCase().includes(q)
+        );
     }
     
-    // Attach profile mappings
-    let profiles = [];
-    if (role === 'Zonal_Admin') profiles = await ZonalAdminProfile.find();
-    else if (role === 'Admin') profiles = await AdminProfile.find();
-    else if (role === 'Sub_Admin') profiles = await SubAdminProfile.find();
-    else if (role === 'Worker') profiles = await WorkerProfile.find();
+    if (queryFilters.accountStatus) {
+        mappedData = mappedData.filter(u => {
+            const displayStatus = u.accountStatus === 'Suspended' ? 'Suspended Account' : (u.kycStatus || 'Incomplete');
+            return displayStatus === queryFilters.accountStatus;
+        });
+    }
 
-    return users.map(user => {
-        const u = user.toObject();
-        const profile = profiles.find(p => p.userId.toString() === u._id.toString());
-        if (profile) {
-            u.domain = profile.domain;
-            u.zone = profile.zone;
-            u.region = profile.region;
-            u.category = profile.category;
-            u.speciality = profile.speciality;
-        }
-        return u;
-    });
+    return { data: mappedData, total, page, limit };
 };
 
 export const getStaffDetails = async (userId, currentUser) => {

@@ -28,6 +28,11 @@ export default function AdminStaffList() {
   const showCategory = ['sub_admin', 'worker'].includes(role || '');
   const showSpeciality = ['worker'].includes(role || '');
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const limit = 20;
+
   useEffect(() => {
     if (role) {
       setFilterDomain(lockDomain ? currentUser?.domain || '' : '');
@@ -37,15 +42,37 @@ export default function AdminStaffList() {
       setFilterSpeciality('');
       setFilterAccountStatus('');
       setSearchQuery('');
-      fetchStaff(role);
+      setPage(1);
     }
   }, [role, currentUser]);
+
+  useEffect(() => {
+    if (role) {
+      fetchStaff(role);
+    }
+  }, [role, page, filterDomain, filterZone, filterRegion, filterCategory, filterSpeciality, filterAccountStatus, searchQuery]);
 
   const fetchStaff = async (roleType: string) => {
     try {
       setLoading(true);
-      const res = await api.get(`/admin/staff-list/${roleType}`);
-      setStaff(res.data.data || []);
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+      
+      if (filterDomain && !lockDomain) params.append('domain', filterDomain);
+      if (filterZone && !lockZone) params.append('zone', filterZone);
+      if (filterRegion && !lockRegion) params.append('region', filterRegion);
+      if (filterCategory && !lockCategory) params.append('category', filterCategory);
+      if (filterSpeciality) params.append('speciality', filterSpeciality);
+      if (filterAccountStatus) params.append('accountStatus', filterAccountStatus);
+      if (searchQuery) params.append('search', searchQuery);
+
+      const res = await api.get(`/admin/staff-list/${roleType}?${params.toString()}`);
+      setStaff(res.data.data.data || []);
+      
+      const total = res.data.data.total || 0;
+      setTotalRecords(total);
+      setTotalPages(Math.ceil(total / limit) || 1);
     } catch (err) {
       console.error('Failed to load staff', err);
     } finally {
@@ -60,36 +87,13 @@ export default function AdminStaffList() {
 
   const roleTitle = role?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') + 's';
 
-
-
-  const filteredStaff = staff.filter(user => {
-    if (filterDomain && user.domain !== filterDomain) return false;
-    if (filterZone && user.zone !== filterZone) return false;
-    if (filterRegion && user.region !== filterRegion) return false;
-    if (filterCategory && user.category !== filterCategory) return false;
-    if (filterSpeciality && user.speciality !== filterSpeciality) return false;
-    
-    if (filterAccountStatus) {
-      const displayStatus = user.accountStatus === 'Suspended' ? 'Suspended Account' : (user.kycStatus || 'Incomplete');
-      if (displayStatus !== filterAccountStatus) return false;
-    }
-
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      if (!user.fullName?.toLowerCase().startsWith(q) && 
-          !user.email?.toLowerCase().startsWith(q) && 
-          !user.mobileNumber?.toLowerCase().startsWith(q)) {
-        return false;
-      }
-    }
-    return true;
-  });
+  const filteredStaff = staff; // Using backend directly
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{roleTitle} Management</h1>
-        <p className="text-gray-500">View registered {roleTitle} in the system.</p>
+        <p className="text-gray-500">View registered {roleTitle} in the system. Total: {totalRecords}</p>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
@@ -100,7 +104,7 @@ export default function AdminStaffList() {
             type="text" 
             placeholder="Search by name / phone no. / email..." 
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
             className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
           />
         </div>
@@ -111,7 +115,7 @@ export default function AdminStaffList() {
             <label className="text-xs font-medium text-gray-500">Domain</label>
             <select 
               value={filterDomain} 
-              onChange={e => setFilterDomain(e.target.value)}
+              onChange={e => { setFilterDomain(e.target.value); setPage(1); }}
               disabled={lockDomain}
               className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
             >
@@ -124,7 +128,7 @@ export default function AdminStaffList() {
             <label className="text-xs font-medium text-gray-500">Zone</label>
             <select 
               value={filterZone} 
-              onChange={e => setFilterZone(e.target.value)}
+              onChange={e => { setFilterZone(e.target.value); setPage(1); }}
               disabled={lockZone}
               className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
             >
@@ -138,7 +142,7 @@ export default function AdminStaffList() {
               <label className="text-xs font-medium text-gray-500">Region</label>
               <select 
                 value={filterRegion} 
-                onChange={e => setFilterRegion(e.target.value)}
+                onChange={e => { setFilterRegion(e.target.value); setPage(1); }}
                 disabled={lockRegion}
                 className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
               >
@@ -153,7 +157,7 @@ export default function AdminStaffList() {
               <label className="text-xs font-medium text-gray-500">Category</label>
               <select 
                 value={filterCategory} 
-                onChange={e => setFilterCategory(e.target.value)}
+                onChange={e => { setFilterCategory(e.target.value); setPage(1); }}
                 disabled={lockCategory}
                 className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
               >
@@ -168,7 +172,7 @@ export default function AdminStaffList() {
               <label className="text-xs font-medium text-gray-500">Speciality</label>
               <select 
                 value={filterSpeciality} 
-                onChange={e => setFilterSpeciality(e.target.value)}
+                onChange={e => { setFilterSpeciality(e.target.value); setPage(1); }}
                 className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
               >
                 <option value="">All Specialities</option>
@@ -197,7 +201,7 @@ export default function AdminStaffList() {
                 <th className="px-6 py-3 font-medium text-gray-500">
                   <select 
                     value={filterAccountStatus} 
-                    onChange={e => setFilterAccountStatus(e.target.value)}
+                    onChange={e => { setFilterAccountStatus(e.target.value); setPage(1); }}
                     className="bg-transparent border-none p-0 focus:outline-none focus:ring-0 font-medium text-gray-500 cursor-pointer hover:text-gray-700"
                   >
                     <option value="">Account Status (All)</option>
@@ -248,6 +252,31 @@ export default function AdminStaffList() {
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="p-4 bg-white border-t border-gray-200 flex items-center justify-between">
+            <span className="text-sm text-gray-500">
+              Showing page {page} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

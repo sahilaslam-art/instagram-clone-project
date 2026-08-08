@@ -66,7 +66,38 @@ export const getAdminDashboard = async (currentUser) => {
         totalUsers = await userRepository.countAll();
         staffVerification = await kycRepository.countPendingByRoles(['Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker']);
     } else {
-        // Determine the target subordinate roles
+        // Find geographic boundaries
+        let profileQuery = {};
+        const ZonalAdminProfile = (await import('../models/zonal-admin.model.js')).ZonalAdminProfile;
+        const AdminProfile = (await import('../models/admin.model.js')).AdminProfile;
+        const SubAdminProfile = (await import('../models/sub-admin.model.js')).SubAdminProfile;
+        const WorkerProfile = (await import('../models/worker.model.js')).WorkerProfile;
+
+        if (currentUser.role === 'Zonal_Admin') {
+            const profile = await ZonalAdminProfile.findOne({ userId: currentUser._id });
+            if (profile) profileQuery = { domain: profile.domain, zone: profile.zone };
+        } else if (currentUser.role === 'Admin') {
+            const profile = await AdminProfile.findOne({ userId: currentUser._id });
+            if (profile) profileQuery = { domain: profile.domain, zone: profile.zone, region: profile.region };
+        } else if (currentUser.role === 'Sub_Admin') {
+            const profile = await SubAdminProfile.findOne({ userId: currentUser._id });
+            if (profile) profileQuery = { domain: profile.domain, zone: profile.zone, region: profile.region, category: profile.category };
+        }
+
+        // Fast counts using Profile models directly
+        if (currentUser.role === 'Zonal_Admin') {
+            totalUsers += await AdminProfile.countDocuments(profileQuery);
+            totalUsers += await SubAdminProfile.countDocuments(profileQuery);
+            totalUsers += await WorkerProfile.countDocuments(profileQuery);
+        } else if (currentUser.role === 'Admin') {
+            totalUsers += await SubAdminProfile.countDocuments(profileQuery);
+            totalUsers += await WorkerProfile.countDocuments(profileQuery);
+        } else if (currentUser.role === 'Sub_Admin') {
+            totalUsers += await WorkerProfile.countDocuments(profileQuery);
+        }
+        totalUsers += 1; // For currentUser themselves
+
+        // Determine the target subordinate roles for KYC counting
         let targetStaffRoles = [];
         if (currentUser.role === 'Zonal_Admin') targetStaffRoles = ['Admin', 'Sub_Admin', 'Worker'];
         if (currentUser.role === 'Admin') targetStaffRoles = ['Sub_Admin', 'Worker'];
@@ -79,8 +110,6 @@ export const getAdminDashboard = async (currentUser) => {
                 authorizedStaffIds.push(...ids);
             }
         }
-
-        totalUsers += authorizedStaffIds.length + 1; // +1 for the currentUser themselves
 
         if (authorizedStaffIds.length > 0) {
             // Count pending KYC only for authorized staff IDs
