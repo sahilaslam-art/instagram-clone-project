@@ -184,7 +184,7 @@ export default function AdminStaffList() {
                 className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
               >
                 <option value="">All Specialities</option>
-                {uniqueSpecialities.map(s => <option key={s} value={s}>{s}</option>)}
+                {[...Array(10)].map((_, i) => <option key={i} value={`S${i+1}`}>S{i+1}</option>)}
               </select>
             </div>
           )}

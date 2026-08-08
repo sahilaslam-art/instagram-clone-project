@@ -211,15 +211,16 @@ export default function RegisterPage() {
             {formData.role === 'Worker' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Speciality</label>
-                <input
-                  type="text"
+                <select
                   name="speciality"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
                   value={formData.speciality}
                   onChange={handleChange}
-                  placeholder="e.g. KYC Reviewer"
-                />
+                >
+                  <option value="">Select Speciality</option>
+                  {[...Array(10)].map((_, i) => <option key={i} value={`S${i+1}`}>S{i+1}</option>)}
+                </select>
               </div>
             )}
 
