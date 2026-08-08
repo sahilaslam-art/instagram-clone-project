@@ -80,8 +80,21 @@ export default function AdminStaffList() {
         <p className="text-gray-500">View registered {roleTitle} in the system.</p>
       </div>
 
-      {(uniqueDomains.length > 0 || uniqueZones.length > 0 || uniqueRegions.length > 0) && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-4">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
+        {/* Left Side: Search Bar */}
+        <div className="relative w-full xl:w-96 shrink-0">
+          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input 
+            type="text" 
+            placeholder="Search by name / phone no. / email..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
+          />
+        </div>
+
+        {/* Right Side: Filters */}
+        <div className="flex flex-wrap gap-4 justify-start xl:justify-end w-full">
           {uniqueDomains.length > 0 && (
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-gray-500">Domain</label>
@@ -148,23 +161,13 @@ export default function AdminStaffList() {
             </div>
           )}
         </div>
-      )}
+      </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="p-4 bg-gray-50 border-b border-gray-200">
           <div className="font-medium text-gray-700 flex items-center gap-2">
             <Shield className="w-5 h-5 text-indigo-600" />
             Current {roleTitle}
-          </div>
-          <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input 
-              type="text" 
-              placeholder="Search by name / phone no. / email..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
-            />
           </div>
         </div>
         <div className="overflow-x-auto">
