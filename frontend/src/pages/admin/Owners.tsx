@@ -193,18 +193,6 @@ export default function AdminOwners() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2 items-center">
-                      {tab === 'PENDING' && (
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRowClick(owner._id);
-                          }}
-                          className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
-                        >
-                          View Profile & Docs
-                        </button>
-                      )}
-                      
                       {owner.kycStatus === 'Verified' ? (
                         <button 
                           onClick={(e) => {

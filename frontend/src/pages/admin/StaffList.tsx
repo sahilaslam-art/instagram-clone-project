@@ -204,7 +204,6 @@ export default function AdminStaffList() {
                     <option value="Suspended Account">Suspended</option>
                   </select>
                 </th>
-                <th className="px-6 py-3 font-medium text-gray-500 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -238,18 +237,6 @@ export default function AdminStaffList() {
                     }`}>
                       {user.accountStatus === 'Suspended' ? 'Suspended Account' : user.kycStatus}
                     </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/admin/staff-details/${user._id}`);
-                        }}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors"
-                      >
-                        <Eye className="w-4 h-4" />
-                        View Profile
-                      </button>
                     </td>
                   </tr>
                 ))

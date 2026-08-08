@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { ShieldAlert, AlertCircle, Ban, CheckCircle, RefreshCcw, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function RestrictedAccounts() {
+  const navigate = useNavigate();
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -86,7 +87,15 @@ export default function RestrictedAccounts() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {accounts.map(acc => (
-                  <tr key={acc._id} className="hover:bg-gray-50">
+                  <tr 
+                    key={acc._id} 
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => {
+                      if (['Admin', 'Sub_Admin', 'Worker', 'Zonal_Admin'].includes(acc.role)) {
+                        navigate(`/admin/staff-details/${acc._id}`);
+                      }
+                    }}
+                  >
                     <td className="px-6 py-4">
                       <div className="font-medium text-gray-900">{acc.fullName}</div>
                       <div className="text-sm text-gray-500">{acc.email}</div>
@@ -111,16 +120,11 @@ export default function RestrictedAccounts() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right space-x-3">
-                      {['Admin', 'Sub_Admin', 'Worker', 'Zonal_Admin'].includes(acc.role) ? (
-                        <Link 
-                          to={`/admin/staff-details/${acc._id}`}
-                          className="text-indigo-600 hover:text-indigo-900 font-medium text-sm transition-colors"
-                        >
-                          View Profile
-                        </Link>
-                      ) : null}
                       <button
-                        onClick={() => handleReactivate(acc._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReactivate(acc._id);
+                        }}
                         disabled={actionLoading === acc._id}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg text-sm font-medium transition-colors"
                       >
