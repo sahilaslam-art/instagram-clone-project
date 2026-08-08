@@ -19,18 +19,23 @@ export default function AdminStaffList() {
   const [filterAccountStatus, setFilterAccountStatus] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const lockDomain = ['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN'].includes(currentUser?.role || '');
+  const lockZone = ['ZONAL_ADMIN', 'ADMIN', 'SUB_ADMIN'].includes(currentUser?.role || '');
+  const lockRegion = ['ADMIN', 'SUB_ADMIN'].includes(currentUser?.role || '');
+  const lockCategory = ['SUB_ADMIN'].includes(currentUser?.role || '');
+
   useEffect(() => {
     if (role) {
-      setFilterDomain('');
-      setFilterZone('');
-      setFilterRegion('');
-      setFilterCategory('');
+      setFilterDomain(lockDomain ? currentUser?.domain || '' : '');
+      setFilterZone(lockZone ? currentUser?.zone || '' : '');
+      setFilterRegion(lockRegion ? currentUser?.region || '' : '');
+      setFilterCategory(lockCategory ? currentUser?.category || '' : '');
       setFilterSpeciality('');
       setFilterAccountStatus('');
       setSearchQuery('');
       fetchStaff(role);
     }
-  }, [role]);
+  }, [role, currentUser]);
 
   const fetchStaff = async (roleType: string) => {
     try {
@@ -108,10 +113,14 @@ export default function AdminStaffList() {
               <select 
                 value={filterDomain} 
                 onChange={e => setFilterDomain(e.target.value)}
-                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+                disabled={lockDomain}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
               >
                 <option value="">All Domains</option>
                 {uniqueDomains.map(d => <option key={d} value={d}>{d}</option>)}
+                {lockDomain && !uniqueDomains.includes(currentUser?.domain || '') && (
+                  <option value={currentUser?.domain}>{currentUser?.domain}</option>
+                )}
               </select>
             </div>
           )}
@@ -121,10 +130,14 @@ export default function AdminStaffList() {
               <select 
                 value={filterZone} 
                 onChange={e => setFilterZone(e.target.value)}
-                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+                disabled={lockZone}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
               >
                 <option value="">All Zones</option>
                 {uniqueZones.map(z => <option key={z} value={z}>{z}</option>)}
+                {lockZone && !uniqueZones.includes(currentUser?.zone || '') && (
+                  <option value={currentUser?.zone}>{currentUser?.zone}</option>
+                )}
               </select>
             </div>
           )}
@@ -134,10 +147,14 @@ export default function AdminStaffList() {
               <select 
                 value={filterRegion} 
                 onChange={e => setFilterRegion(e.target.value)}
-                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+                disabled={lockRegion}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
               >
                 <option value="">All Regions</option>
                 {uniqueRegions.map(r => <option key={r} value={r}>{r}</option>)}
+                {lockRegion && !uniqueRegions.includes(currentUser?.region || '') && (
+                  <option value={currentUser?.region}>{currentUser?.region}</option>
+                )}
               </select>
             </div>
           )}
@@ -147,10 +164,14 @@ export default function AdminStaffList() {
               <select 
                 value={filterCategory} 
                 onChange={e => setFilterCategory(e.target.value)}
-                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+                disabled={lockCategory}
+                className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500"
               >
                 <option value="">All Categories</option>
                 {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                {lockCategory && !uniqueCategories.includes(currentUser?.category || '') && (
+                  <option value={currentUser?.category}>{currentUser?.category}</option>
+                )}
               </select>
             </div>
           )}
