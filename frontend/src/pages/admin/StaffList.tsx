@@ -167,22 +167,6 @@ export default function AdminStaffList() {
               </select>
             </div>
           )}
-          
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-500">Account Status</label>
-            <select 
-              value={filterAccountStatus} 
-              onChange={e => setFilterAccountStatus(e.target.value)}
-              className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-            >
-              <option value="">All Statuses</option>
-              <option value="Verified">Verified</option>
-              <option value="Incomplete">Incomplete</option>
-              <option value="Pending">Pending</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Suspended Account">Suspended</option>
-            </select>
-          </div>
         </div>
       </div>
 
@@ -201,7 +185,20 @@ export default function AdminStaffList() {
                 <th className="px-6 py-3 font-medium text-gray-500">Email</th>
                 <th className="px-6 py-3 font-medium text-gray-500">Phone</th>
                 <th className="px-6 py-3 font-medium text-gray-500">Geographic Mapping</th>
-                <th className="px-6 py-3 font-medium text-gray-500">Account Status</th>
+                <th className="px-6 py-3 font-medium text-gray-500">
+                  <select 
+                    value={filterAccountStatus} 
+                    onChange={e => setFilterAccountStatus(e.target.value)}
+                    className="bg-transparent border-none p-0 focus:outline-none focus:ring-0 font-medium text-gray-500 cursor-pointer hover:text-gray-700"
+                  >
+                    <option value="">Account Status (All)</option>
+                    <option value="Verified">Verified</option>
+                    <option value="Incomplete">Incomplete</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Suspended Account">Suspended</option>
+                  </select>
+                </th>
                 <th className="px-6 py-3 font-medium text-gray-500 text-right">Actions</th>
               </tr>
             </thead>
