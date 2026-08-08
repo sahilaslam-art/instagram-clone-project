@@ -26,6 +26,7 @@ export const getAdminDashboard = async (req, res, next) => {
         const data = await dashboardService.getAdminDashboard(req.user);
         return sendResponse(res, 200, true, 'Admin Dashboard Retrieved', data);
     } catch (error) {
+        import('fs').then(fs => fs.writeFileSync('error_log.txt', error.stack || error.toString()));
         next(error);
     }
 };
