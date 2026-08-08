@@ -140,29 +140,26 @@ export default function AdminCustomers() {
                 <td colSpan={5} className="px-6 py-8 text-center text-gray-500">Loading...</td>
               </tr>
             ) : (() => {
-              let filteredCustomers = customers.filter(customer => {
+              const filteredCustomers = customers.filter(customer => {
                 let matchTab = false;
                 if (tab === 'REGISTERED') matchTab = customer.kycStatus === 'Incomplete';
                 else if (tab === 'PENDING') matchTab = customer.kycStatus === 'Pending';
                 else if (tab === 'DENIED') matchTab = customer.kycStatus === 'Rejected';
                 else if (tab === 'VERIFIED') matchTab = customer.kycStatus === 'Verified' && customer.accountStatus === 'Active';
                 else if (tab === 'SUSPENDED') matchTab = customer.accountStatus === 'Suspended';
-                return matchTab;
-              });
-
-              if (searchQuery) {
-                const q = searchQuery.toLowerCase();
-                const nameMatches = filteredCustomers.filter(customer => customer.fullName?.toLowerCase().startsWith(q));
                 
-                if (nameMatches.length > 0) {
-                  filteredCustomers = nameMatches;
-                } else {
-                  filteredCustomers = filteredCustomers.filter(customer => 
-                    customer.email?.toLowerCase().startsWith(q) || 
-                    customer.mobileNumber?.toLowerCase().startsWith(q)
-                  );
+                if (!matchTab) return false;
+
+                if (searchQuery) {
+                  const q = searchQuery.toLowerCase();
+                  if (!customer.fullName?.toLowerCase().startsWith(q) && 
+                      !customer.email?.toLowerCase().startsWith(q) && 
+                      !customer.mobileNumber?.toLowerCase().startsWith(q)) {
+                    return false;
+                  }
                 }
-              }
+                return true;
+              });
 
               if (filteredCustomers.length === 0) {
                 return (
