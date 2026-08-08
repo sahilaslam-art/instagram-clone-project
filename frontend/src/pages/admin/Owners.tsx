@@ -140,27 +140,29 @@ export default function AdminOwners() {
                 <td colSpan={5} className="px-6 py-8 text-center text-gray-500">Loading...</td>
               </tr>
             ) : (() => {
-              const filteredOwners = owners.filter(owner => {
+              let filteredOwners = owners.filter(owner => {
                 let matchTab = false;
                 if (tab === 'REGISTERED') matchTab = owner.kycStatus === 'Incomplete';
                 else if (tab === 'PENDING') matchTab = owner.kycStatus === 'Pending';
                 else if (tab === 'DENIED') matchTab = owner.kycStatus === 'Rejected';
                 else if (tab === 'VERIFIED') matchTab = owner.kycStatus === 'Verified' && owner.accountStatus === 'Active';
                 else if (tab === 'SUSPENDED') matchTab = owner.accountStatus === 'Suspended';
-                else matchTab = true;
-
-                if (!matchTab) return false;
-
-                if (searchQuery) {
-                  const q = searchQuery.toLowerCase();
-                  if (!owner.fullName?.toLowerCase().startsWith(q) && 
-                      !owner.email?.toLowerCase().startsWith(q) && 
-                      !owner.mobileNumber?.toLowerCase().startsWith(q)) {
-                    return false;
-                  }
-                }
-                return true;
+                return matchTab;
               });
+
+              if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                const nameMatches = filteredOwners.filter(owner => owner.fullName?.toLowerCase().startsWith(q));
+                
+                if (nameMatches.length > 0) {
+                  filteredOwners = nameMatches;
+                } else {
+                  filteredOwners = filteredOwners.filter(owner => 
+                    owner.email?.toLowerCase().startsWith(q) || 
+                    owner.mobileNumber?.toLowerCase().startsWith(q)
+                  );
+                }
+              }
 
               if (filteredOwners.length === 0) {
                 return (

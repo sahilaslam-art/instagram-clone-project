@@ -57,7 +57,7 @@ export default function AdminStaffList() {
   const uniqueCategories = Array.from(new Set(staff.map(s => s.category).filter(Boolean)));
   const uniqueSpecialities = Array.from(new Set(staff.map(s => s.speciality).filter(Boolean)));
 
-  const filteredStaff = staff.filter(user => {
+  let filteredStaff = staff.filter(user => {
     if (filterDomain && user.domain !== filterDomain) return false;
     if (filterZone && user.zone !== filterZone) return false;
     if (filterRegion && user.region !== filterRegion) return false;
@@ -68,17 +68,22 @@ export default function AdminStaffList() {
       const displayStatus = user.accountStatus === 'Suspended' ? 'Suspended Account' : (user.kycStatus || 'Incomplete');
       if (displayStatus !== filterAccountStatus) return false;
     }
-    
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      if (!user.fullName?.toLowerCase().startsWith(q) && 
-          !user.email?.toLowerCase().startsWith(q) && 
-          !user.mobileNumber?.toLowerCase().startsWith(q)) {
-        return false;
-      }
-    }
     return true;
   });
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    const nameMatches = filteredStaff.filter(user => user.fullName?.toLowerCase().startsWith(q));
+    
+    if (nameMatches.length > 0) {
+      filteredStaff = nameMatches;
+    } else {
+      filteredStaff = filteredStaff.filter(user => 
+        user.email?.toLowerCase().startsWith(q) || 
+        user.mobileNumber?.toLowerCase().startsWith(q)
+      );
+    }
+  }
 
   return (
     <div className="space-y-6">
