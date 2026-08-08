@@ -153,9 +153,9 @@ export default function AdminOwners() {
 
                 if (searchQuery) {
                   const q = searchQuery.toLowerCase();
-                  if (!owner.fullName?.toLowerCase().includes(q) && 
-                      !owner.email?.toLowerCase().includes(q) && 
-                      !owner.mobileNumber?.toLowerCase().includes(q)) {
+                  if (!owner.fullName?.toLowerCase().startsWith(q) && 
+                      !owner.email?.toLowerCase().startsWith(q) && 
+                      !owner.mobileNumber?.toLowerCase().startsWith(q)) {
                     return false;
                   }
                 }

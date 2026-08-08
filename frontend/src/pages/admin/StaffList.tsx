@@ -71,9 +71,9 @@ export default function AdminStaffList() {
     
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      if (!user.fullName?.toLowerCase().includes(q) && 
-          !user.email?.toLowerCase().includes(q) && 
-          !user.mobileNumber?.toLowerCase().includes(q)) {
+      if (!user.fullName?.toLowerCase().startsWith(q) && 
+          !user.email?.toLowerCase().startsWith(q) && 
+          !user.mobileNumber?.toLowerCase().startsWith(q)) {
         return false;
       }
     }

@@ -153,9 +153,9 @@ export default function AdminCustomers() {
 
                 if (searchQuery) {
                   const q = searchQuery.toLowerCase();
-                  if (!customer.fullName?.toLowerCase().includes(q) && 
-                      !customer.email?.toLowerCase().includes(q) && 
-                      !customer.mobileNumber?.toLowerCase().includes(q)) {
+                  if (!customer.fullName?.toLowerCase().startsWith(q) && 
+                      !customer.email?.toLowerCase().startsWith(q) && 
+                      !customer.mobileNumber?.toLowerCase().startsWith(q)) {
                     return false;
                   }
                 }
