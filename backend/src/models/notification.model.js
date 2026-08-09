@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const notificationSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    userRole: { type: String, enum: ['Customer', 'Owner', 'Admin'], required: true },
+    userRole: { type: String, enum: ['Customer', 'Owner', 'Zonal_Admin', 'Admin', 'Sub_Admin', 'Worker', 'Super_Admin'], required: true },
     
     notificationType: { type: String, required: true },
     notificationTitle: { type: String, required: true },

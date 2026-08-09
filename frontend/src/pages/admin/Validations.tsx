@@ -83,6 +83,23 @@ export default function AdminValidations() {
                       <div className="text-gray-500 mb-1">Risk Level</div>
                       <div className="font-medium text-gray-900">{project.riskLevel}</div>
                     </div>
+                    {/* Geo Mapping Info */}
+                    <div className="col-span-2">
+                      <div className="text-gray-500 mb-1">Geographic Mapping</div>
+                      <div className="font-medium text-gray-900">
+                        {[project.domain, project.zone, project.region, project.category].filter(Boolean).join(' › ') || <span className="text-amber-600 text-xs">Not mapped</span>}
+                      </div>
+                    </div>
+                    {project.requiredSpecialities?.length > 0 && (
+                      <div className="col-span-2">
+                        <div className="text-gray-500 mb-1">Required Specialities</div>
+                        <div className="flex flex-wrap gap-1">
+                          {project.requiredSpecialities.map((s: string) => (
+                            <span key={s} className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-xs rounded-full border border-indigo-200">{s}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

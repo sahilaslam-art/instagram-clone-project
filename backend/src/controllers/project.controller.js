@@ -79,10 +79,10 @@ export const getProjectDetails = async (req, res, next) => {
 export const reviewProject = async (req, res, next) => {
     try {
         const projectId = req.params.projectId;
-        const project = await projectService.reviewProject(projectId, req.body);
+        const project = await projectService.reviewProject(projectId, req.body, req.user);
         return sendResponse(res, 200, true, 'Project Reviewed Successfully', project);
     } catch (error) {
-        if (error.message === 'Project not found' || error.message === 'Rejection reason is required') {
+        if (error.message === 'Project not found' || error.message === 'Rejection reason is required' || error.message.includes('Not authorized')) {
             return sendResponse(res, 400, false, error.message);
         }
         next(error);
@@ -125,7 +125,7 @@ export const getProjectInvestors = async (req, res, next) => {
 
 export const getPendingProjects = async (req, res, next) => {
     try {
-        const projects = await projectService.getPendingProjects();
+        const projects = await projectService.getPendingProjects(req.user);
         return sendResponse(res, 200, true, 'Pending Projects Retrieved', projects);
     } catch (error) {
         next(error);
@@ -134,7 +134,7 @@ export const getPendingProjects = async (req, res, next) => {
 
 export const getActiveProjects = async (req, res, next) => {
     try {
-        const projects = await projectService.getActiveProjects();
+        const projects = await projectService.getActiveProjects(req.user);
         return sendResponse(res, 200, true, 'Active Projects Retrieved', projects);
     } catch (error) {
         next(error);

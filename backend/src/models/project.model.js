@@ -10,7 +10,13 @@ const projectSchema = new mongoose.Schema({
     projectDescription: { type: String, required: true },
     projectLocation: { type: String, required: true },
 
-    // Financial Information
+    // Hierarchical Routing Fields
+    domain: { type: String, default: null },           // e.g., D1–D9
+    zone: { type: String, default: null },             // e.g., Z1–Z9
+    region: { type: String, default: null },           // e.g., R1–R20
+    category: { type: String, default: null },         // e.g., C1–C10
+    requiredSpecialities: [{ type: String }],          // e.g., ['S1', 'S5']
+
     fundingTarget: { type: Number, required: true },
     currentRaisedAmount: { type: Number, default: 0 },
     minimumInvestmentAmount: { type: Number, required: true },

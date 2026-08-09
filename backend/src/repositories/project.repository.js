@@ -18,17 +18,21 @@ export const findAllByOwner = async (ownerId) => {
     return await Project.find({ ownerId }).sort('-createdAt');
 };
 
-export const findAllPending = async () => {
-    return await Project.find({ projectStatus: 'Submitted' }).populate('ownerId', 'fullName').sort('createdAt');
+export const findAllPending = async (geoFilter = {}) => {
+    return await Project.find({ projectStatus: 'Submitted', ...geoFilter })
+        .populate('ownerId', 'fullName email')
+        .sort('createdAt');
 };
 
-export const countPending = async () => {
-    return await Project.countDocuments({ projectStatus: 'Submitted' });
+export const countPending = async (geoFilter = {}) => {
+    return await Project.countDocuments({ projectStatus: 'Submitted', ...geoFilter });
 };
 
 
-export const findActive = async () => {
-    return await Project.find({ projectStatus: { $in: ['Stage', 'Live', 'Finished'] } }).populate('ownerId', 'fullName email').sort('-createdAt');
+export const findActive = async (geoFilter = {}) => {
+    return await Project.find({ projectStatus: { $in: ['Stage', 'Live', 'Finished'] }, ...geoFilter })
+        .populate('ownerId', 'fullName email')
+        .sort('-createdAt');
 };
 
 export const create = async (projectData) => {

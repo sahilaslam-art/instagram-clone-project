@@ -6,6 +6,7 @@ import * as notificationRepository from '../repositories/notification.repository
 import * as kycRepository from '../repositories/kyc.repository.js';
 import * as supportRepository from '../repositories/support.repository.js';
 import * as profileUpdateRepository from '../repositories/profile-update-request.repository.js';
+import { buildGeoFilterForUser } from './project.service.js';
 
 export const getCustomerDashboard = async (userId) => {
     const user = await userRepository.findById(userId);
@@ -124,7 +125,11 @@ export const getAdminDashboard = async (currentUser) => {
     
     const customerOwnerVerification = await kycRepository.countPendingByRoles(['Customer', 'Owner']);
     const profileUpdates = await profileUpdateRepository.countPending();
-    const projectsVerification = await projectRepository.countPending();
+    
+    // Scoped project count — each admin sees only projects in their jurisdiction
+    const projectGeoFilter = await buildGeoFilterForUser(currentUser) || {};
+    const projectsVerification = await projectRepository.countPending(projectGeoFilter);
+    
     const withdrawals = await walletRepository.countPendingWithdrawals();
     const supportTickets = await supportRepository.countAll('Open');
 

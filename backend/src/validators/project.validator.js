@@ -9,7 +9,13 @@ export const createProjectSchema = z.object({
         fundingTarget: z.number({ required_error: "Funding Target is required" }).positive(),
         minimumInvestmentAmount: z.number({ required_error: "Minimum Investment Amount is required" }).positive(),
         expectedReturn: z.number({ required_error: "Expected Return is required" }).positive(),
-        riskLevel: z.enum(['Low', 'Medium', 'High'], { required_error: "Risk Level is required" })
+        riskLevel: z.enum(['Low', 'Medium', 'High'], { required_error: "Risk Level is required" }),
+        // Hierarchical routing fields (optional at creation, required at submit — validated in service)
+        domain: z.string().optional().nullable(),
+        zone: z.string().optional().nullable(),
+        region: z.string().optional().nullable(),
+        category: z.string().optional().nullable(),
+        requiredSpecialities: z.array(z.string()).optional().default([])
     })
 });
 
